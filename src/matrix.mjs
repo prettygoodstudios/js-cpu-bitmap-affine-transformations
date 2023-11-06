@@ -13,7 +13,7 @@ export class Matrix {
         this._cols = cols;
         if (!data) {
             data = new Float32Array(rows * cols);
-        } 
+        }
         if (!dataRowSize) {
             dataRowSize = cols;
         }
@@ -88,10 +88,10 @@ export class Matrix {
 
     /**
      * 
-     * @param {number} colStart 
-     * @param {number} colEnd 
-     * @param {number} rowStart 
-     * @param {number} rowEnd 
+     * @param {number} colStart
+     * @param {number} colEnd
+     * @param {number} rowStart
+     * @param {number} rowEnd
      * @returns {Matrix}
      */
     slice(colStart, colEnd, rowStart, rowEnd) {
@@ -180,12 +180,14 @@ export class Matrix {
             if (i === this.rows - 1) {
                 continue;
             }
-            const multiples = clone.get(i, i+1);
-            for (let c = 0; c < this.rows; c++) {
-                const subtract = clone.get(c, i) * multiples;
-                const subtractIdentity = identity.get(c, i) * multiples;
-                clone.set(c, i+1, clone.get(c, i+1) - subtract);
-                identity.set(c, i+1, identity.get(c, i+1) - subtractIdentity);
+            for (let j = i+1; j < this.rows; j++) {
+                const multiples = clone.get(i, j);
+                for (let c = 0; c < this.rows; c++) {
+                    const subtract = clone.get(c, i) * multiples;
+                    const subtractIdentity = identity.get(c, i) * multiples;
+                    clone.set(c, j, clone.get(c, j) - subtract);
+                    identity.set(c, j, identity.get(c, j) - subtractIdentity);
+                }
             }
         }
         // convert left matrix into an identity matrix

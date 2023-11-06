@@ -1,10 +1,10 @@
-import { Matrix } from "./matrix.js";
+import { Matrix } from "./matrix.mjs";
 import { setPixel, getPixel } from "./bitmap.js";
 
 /**
  * 
- * @param {number} x 
- * @param {number} y 
+ * @param {number} x
+ * @param {number} y
  */
 export function scale(x, y) {
     if (y === undefined) {
@@ -154,7 +154,6 @@ export function transform(imageData, commands, origin) {
         return m;
     });
 
-    // const {top, right, bottom, left} = { top: 0, right: imageData.width, left: 0, bottom: imageData.height};
     const {top, right, bottom, left} = computeBoundingBox(extrema);
 
     const inverseTransformMatrix = transformMatrix.inverse();

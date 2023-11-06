@@ -8,7 +8,7 @@ import { transform } from "./transform.js";
  * @param {number} lastFrame
  */
 export function animateImageData(imageData, angle, lastFrame) {
-    const { newImageData, left, top } = transform(imageData, `translateX(${angle*0.5}) scale(1.2) rotate(${angle})`);
+    const { newImageData, left, top } = transform(imageData, `translate(${angle*0.5}, ${angle*0.5}) scale(1.2) rotate(${angle})`);
     const animation = document.querySelector('#animation');
     const animationWrapper = document.querySelector('#animationWrapper');
     animationWrapper.style.width = `${imageData.width}px`;
