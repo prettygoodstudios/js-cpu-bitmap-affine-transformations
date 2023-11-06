@@ -104,9 +104,13 @@ export class Matrix {
      * @return {number}
      */
     dot(vector) {
+        /** @type {number|undefined} */
         let myDimensions;
+        /** @type {(i: number) => number|undefined} */
         let getMyValue;
+        /** @type {number|undefined} */
         let vectorDimensions;
+        /** @type {(i: number) => number|undefined} */
         let getVectorValue;
         if (this.cols === 1) {
             myDimensions = this.rows;

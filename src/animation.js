@@ -1,5 +1,5 @@
-import { imageDataToImage } from "./bitmap.js";
-import { transform } from "./transform.js";
+import { imageDataToImage } from "./bitmap.mjs";
+import { transform } from "./transform.mjs";
 
 /**
  * 

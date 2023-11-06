@@ -1,4 +1,4 @@
-import { getBitmap } from "./bitmap.js";
+import { getBitmap } from "./bitmap.mjs";
 import { animateImageData } from "./animation.js";
 
 async function main() {

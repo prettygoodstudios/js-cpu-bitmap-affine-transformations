@@ -1,5 +1,5 @@
 import { Matrix } from "./matrix.mjs";
-import { setPixel, getPixel } from "./bitmap.js";
+import { setPixel, getPixel } from "./bitmap.mjs";
 
 /**
  * 
