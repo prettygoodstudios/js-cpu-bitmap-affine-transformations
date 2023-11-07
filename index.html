@@ -4,12 +4,14 @@
         <title>Bitmap Affine Transformation</title>
     </head>
     <body>
-        <div>
-            <img src="./assets/mysvg.svg" />
-            <img id="src" src="./assets/image.jpeg" />
-        </div>
-        <div id="animationWrapper">
-            <img id="animation" />
+        <form id="imageForm">
+            <label for="imageInput">Select Image:</label>
+            <input accept=".png,.jpeg,.jpg,.svg" type="file" id="imageInput"/>
+            <label for="transform">Transform:</label>
+            <input id="transform" placeholder="transform"/>
+            <button>Apply!</button>
+        </form>
+        <div id="transformWrapper">
         </div>
         <script src="./src/index.js" type="module"></script>
     </body>

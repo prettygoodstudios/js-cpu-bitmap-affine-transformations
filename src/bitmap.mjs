@@ -1,10 +1,10 @@
+
 /**
  * 
- * @param {string} selector 
+ * @param {CanvasImageSource} image
  * @returns {Promise<ImageData>}
  */
-export async function getBitmap(selector) {
-    const bitmap = await createImageBitmap(document.querySelector(selector));
+export function getBitmapFromImageSource(bitmap) {
     const canvas = document.createElement('canvas');
     canvas.width = bitmap.width;
     canvas.height = bitmap.height;
@@ -12,6 +12,16 @@ export async function getBitmap(selector) {
     context.drawImage(bitmap, 0, 0);
     const imageData = context.getImageData(0, 0, bitmap.width, bitmap.height);
     return imageData;
+}
+
+/**
+ * 
+ * @param {string} selector 
+ * @returns {Promise<ImageData>}
+ */
+export async function getBitmap(selector) {
+    const bitmap = await createImageBitmap(document.querySelector(selector));
+    return getBitmapFromImageSource(bitmap);
 }
 
 /**
