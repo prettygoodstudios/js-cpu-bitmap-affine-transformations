@@ -139,6 +139,79 @@ export class Matrix {
     }
 
     /**
+     * Performs Gauss Jordan Elimination on a linear system
+     * Doesn't mutate matrix or right hand side
+     * @param {Matrix} rightHandSide 
+     * @returns {{
+     *  leftHandSide: Matrix;
+     *  rightHandSide: Matrix;
+     * }}
+     */
+    gje(rightHandSide) {
+        rightHandSide = rightHandSide.copy();
+        const leftHandSide = this.copy();
+        // put left matrix into row echelon
+        for (let i = 0; i < this.rows; i++) {
+            let scaleFactor = leftHandSide.get(i, i);
+            // We need to perform a row swap
+            if (Math.abs(scaleFactor) < Number.EPSILON) {
+                let swap;
+                for (let r = i; r < this.rows; r++) {
+                    if (Math.abs(leftHandSide.get(i, r)) >= Number.EPSILON) {
+                        swap = r;
+                        break;
+                    }
+                }
+                if (swap === undefined) {
+                    throw Error(`The matrix is singular. There is not a unique solution to the system.`);
+                }
+                for (let c = 0; c < this.rows; c++) {
+                    const myValue = leftHandSide.get(c, i);
+                    const rightHandSideMyValue = rightHandSide.get(c, i);
+                    leftHandSide.set(c, i, leftHandSide.get(c, swap));
+                    leftHandSide.set(c, swap, myValue);
+                    rightHandSide.set(c, i, rightHandSide.get(c, swap));
+                    rightHandSide.set(c, swap, rightHandSideMyValue);
+                }
+                scaleFactor = leftHandSide.get(i, i);
+            }
+
+            for (let c = 0; c < this.rows; c++) {
+                leftHandSide.set(c, i, leftHandSide.get(c, i) / scaleFactor);
+               rightHandSide.set(c, i,rightHandSide.get(c, i) / scaleFactor);
+            }
+            if (i === this.rows - 1) {
+                continue;
+            }
+            for (let j = i+1; j < this.rows; j++) {
+                const multiples = leftHandSide.get(i, j);
+                for (let c = 0; c < this.rows; c++) {
+                    const subtract = leftHandSide.get(c, i) * multiples;
+                    const subtractRightHandSide = rightHandSide.get(c, i) * multiples;
+                    leftHandSide.set(c, j, leftHandSide.get(c, j) - subtract);
+                    rightHandSide.set(c, j, rightHandSide.get(c, j) - subtractRightHandSide);
+                }
+            }
+        }
+        // convert left into reduced row echelon
+        for (let i = this.rows - 1; i > 0; i--) {
+            for (let r = i-1; r >= 0; r--) {
+                const multiples = leftHandSide.get(i, r);
+                for (let c = 0; c < this.rows; c++) {
+                    const subtract = leftHandSide.get(c, i) * multiples;
+                    const subtractRightHandSide = rightHandSide.get(c, i) * multiples;
+                    leftHandSide.set(c, r, leftHandSide.get(c, r) - subtract);
+                    rightHandSide.set(c, r, rightHandSide.get(c, r) - subtractRightHandSide);
+                }
+            }
+        }
+        return {
+            leftHandSide,
+            rightHandSide,
+        }
+    }
+
+    /**
      * 
      * @returns {Matrix}
      */
@@ -150,64 +223,9 @@ export class Matrix {
         for (let i = 0; i < this.rows; i++) {
             identity.set(i, i, 1);
         }
-        const clone = this.copy();
-        // put left matrix into reduced row echelon
-        for (let i = 0; i < this.rows; i++) {
-            let scaleFactor = clone.get(i, i);
-            // We need to perform a row swap
-            if (Math.abs(scaleFactor) < Number.EPSILON) {
-                let swap;
-                for (let r = i; r < this.rows; r++) {
-                    if (Math.abs(clone.get(i, r)) >= Number.EPSILON) {
-                        swap = r;
-                        break;
-                    }
-                }
-                if (swap === undefined) {
-                    throw Error(`Can't compute inverse of singular matrix`);
-                }
-                for (let c = 0; c < this.rows; c++) {
-                    const myValue = clone.get(c, i);
-                    const identityMyValue = identity.get(c, i);
-                    clone.set(c, i, clone.get(c, swap));
-                    clone.set(c, swap, myValue);
-                    identity.set(c, i, identity.get(c, swap));
-                    identity.set(c, swap, identityMyValue);
-                }
-                scaleFactor = clone.get(i, i);
-            }
-
-            for (let c = 0; c < this.rows; c++) {
-                clone.set(c, i, clone.get(c, i) / scaleFactor);
-                identity.set(c, i, identity.get(c, i) / scaleFactor);
-            }
-            if (i === this.rows - 1) {
-                continue;
-            }
-            for (let j = i+1; j < this.rows; j++) {
-                const multiples = clone.get(i, j);
-                for (let c = 0; c < this.rows; c++) {
-                    const subtract = clone.get(c, i) * multiples;
-                    const subtractIdentity = identity.get(c, i) * multiples;
-                    clone.set(c, j, clone.get(c, j) - subtract);
-                    identity.set(c, j, identity.get(c, j) - subtractIdentity);
-                }
-            }
-        }
-        // convert left matrix into an identity matrix
-        for (let i = this.rows - 1; i > 0; i--) {
-            for (let r = i-1; r >= 0; r--) {
-                const multiples = clone.get(i, r);
-                for (let c = 0; c < this.rows; c++) {
-                    const subtract = clone.get(c, i) * multiples;
-                    const subtractIdentity = identity.get(c, i) * multiples;
-                    clone.set(c, r, clone.get(c, r) - subtract);
-                    identity.set(c, r, identity.get(c, r) - subtractIdentity);
-                }
-            }
-        }
+        const { rightHandSide } = this.gje(identity);
         
-        return identity;
+        return rightHandSide;
     }
 
     copy() {
