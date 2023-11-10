@@ -108,6 +108,49 @@ describe('Testing Matrix', () => {
                 0, 0, 1,
             ]));
         });
+        test('by scalar', () => {
+            const matrix = new Matrix(3, 3, new Float32Array([
+                1, 2, 0,
+                4, 5, 0,
+                0, 0, 1,
+            ]));
+            expect(matrix.multiply(3)).toStrictEqual(new Matrix(3, 3, new Float32Array([
+                3, 6, 0,
+                12, 15, 0,
+                0, 0, 3,
+            ])));
+        });
+    });
+    describe('add', () => {
+        test('scalar', () => {
+            const matrix = new Matrix(3, 3, new Float32Array([
+                1, 2, 0,
+                4, 5, 0,
+                0, 0, 1,
+            ]));
+            expect(matrix.add(3)).toStrictEqual(new Matrix(3, 3, new Float32Array([
+                4, 5, 3,
+                7, 8, 3,
+                3, 3, 4,
+            ])));
+        });
+        test('matrix', () => {
+            const matrix = new Matrix(3, 3, new Float32Array([
+                1, 2, 0,
+                4, 5, 0,
+                0, 0, 1,
+            ]));
+            const identity = new Matrix(3, 3, new Float32Array([
+                1, 0, 0,
+                0, 1, 0,
+                0, 0, 1,
+            ]));
+            expect(matrix.add(identity)).toStrictEqual(new Matrix(3, 3, new Float32Array([
+                2, 2, 0,
+                4, 6, 0,
+                0, 0, 2,
+            ])));
+        });
     });
     describe('dot', () => {
         test('both column', () => {
