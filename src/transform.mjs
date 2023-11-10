@@ -155,9 +155,19 @@ export function transform(imageData, commands, origin) {
     });
 
     const {top, right, bottom, left} = computeBoundingBox(extrema);
+    // The ImageData constructor doesn't permit images with a dimension of 0
+    const newImageData = new ImageData((right - left) || 1, (bottom - top) || 1);
+    if (Math.abs(transformMatrix.det()) < Number.EPSILON) {
+        // The transform matrix is singular. This can only occur if it's scaled to 0.
+        return {
+            newImageData,
+            left,
+            top,
+        }
+    }
 
     const inverseTransformMatrix = transformMatrix.inverse();
-    const newImageData = new ImageData(right - left, bottom - top);
+    console.time('Loop');
     for (let row = top; row < bottom; row++) {
         for (let col = left; col < right; col++) {
             const positionVector = new Matrix(3, 1, new Float32Array([
@@ -174,6 +184,7 @@ export function transform(imageData, commands, origin) {
             }
         }
     }
+    console.timeEnd('Loop');
 
     return {
         newImageData,

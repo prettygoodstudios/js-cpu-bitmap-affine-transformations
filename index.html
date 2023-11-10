@@ -5,13 +5,20 @@
         <link rel="stylesheet" href="./styles.css" />
     </head>
     <body>
-        <form id="imageForm">
-            <label for="imageInput">Select Image:</label>
-            <input accept=".png,.jpeg,.jpg,.svg" type="file" id="imageInput"/>
-            <label for="transform">Transform:</label>
-            <input id="transform" placeholder="transform"/>
-            <button>Apply!</button>
-        </form>
+        <div class="InfoSection">
+            <form class="InfoSection__form" id="imageForm">
+                <label for="imageInput">Select Image:</label>
+                <input accept=".png,.jpeg,.jpg,.svg" type="file" id="imageInput"/>
+                <label for="transform">Transform:</label>
+                <input id="transform" placeholder="transform"/>
+                <button>Apply!</button>
+            </form>
+            <div class="InfoSection__documentation">
+                <p>Note: The transform origin is set to the center of the image, and the transform functions don't support units in arguments. Rotate uses degrees and translate uses pixels i.e.</p>
+                <pre>translate(100, 100) rotate(45) scale(2)</pre>
+                <p>Scales it up by a factor of 2, rotates by 45 degrees and then translates it 100px to the right and 100px down.</p>
+            </div>
+        </div>
         <div id="transformWrapper">
         </div>
         <script src="./src/index.js" type="module"></script>

@@ -239,7 +239,9 @@ export class Matrix {
                     }
                 }
                 if (swap === undefined) {
-                    throw Error('The matrix is singular. There is not a unique solution to the system.');
+                    // The matrix doesn't have a pivot for this row
+                    // The matrix is singular and there isn't a unique solution.
+                    continue;
                 }
                 leftHandSide.rowSwap(row, swap);
                 rightHandSide.rowSwap(row, swap);
@@ -278,6 +280,18 @@ export class Matrix {
             leftHandSide,
             rightHandSide,
         }
+    }
+
+    det() {
+        if (this.rows !== this.cols) {
+            throw Error('Can only compute the determinant of a square matrix');
+        }
+        const { leftHandSide, rightHandSide } = this.gje(new Matrix(this.rows, 1, new Float32Array(Array.from(Array(this.rows), () => 1))));
+        let determinant = 1;
+        for (let i = 0; i < this.rows; i++) {
+            determinant *= leftHandSide.get(i, i) / rightHandSide.get(0, i);
+        }
+        return determinant;
     }
 
     /**

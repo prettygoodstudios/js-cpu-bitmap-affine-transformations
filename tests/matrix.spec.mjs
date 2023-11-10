@@ -277,6 +277,43 @@ describe('Testing Matrix', () => {
             });
         });
     });
+    describe('det', () => {
+        test('matrix with one out of 3 pivots', () => {
+            expect(new Matrix(3, 3, new Float32Array([
+                1, 2, 3,
+                3, 6, 9,
+                2, 4, 6,
+            ])).det()).toBeCloseTo(0);
+        });
+        test('matrix with missing pivot in the middle', () => {
+            expect(new Matrix(3, 3, new Float32Array([
+                1, 2, 3,
+                3, 6, 7,
+                2, 4, 6,
+            ])).det()).toBeCloseTo(0);
+        });
+        test('matrix with missing pivot in last col', () => {
+            expect(new Matrix(3, 3, new Float32Array([
+                1, 2, 3,
+                3, 6, 9,
+                2, 4, 2,
+            ])).det()).toBeCloseTo(0);
+        });
+        test('scale matrix with scale factor of 2', () => {
+            expect(new Matrix(3, 3, new Float32Array([
+                2, 0, 0,
+                0, 2, 0,
+                0, 0, 1,
+            ])).det()).toBeCloseTo(4);
+        });
+        test('scale matrix with scale factor of 1/4', () => {
+            expect(new Matrix(3, 3, new Float32Array([
+                1/4, 0, 0,
+                0, 1/4, 0,
+                0, 0, 1,
+            ])).det()).toBeCloseTo(1/16);
+        });
+    });
     describe('inverse', () => {
         test('identity', () => {
             expect(new Matrix(3, 3, new Float32Array([
