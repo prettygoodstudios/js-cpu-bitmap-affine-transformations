@@ -208,6 +208,7 @@ describe('Testing Matrix', () => {
                     2,
                     1
                 ])),
+                scaledDown: 1,
             });
         });
         test('diagonal on left hand side', () => {
@@ -230,6 +231,7 @@ describe('Testing Matrix', () => {
                     1,
                     1
                 ])),
+                scaledDown: 6,
             });
         });
         test('upper triangular on left hand side', () => {
@@ -252,6 +254,7 @@ describe('Testing Matrix', () => {
                     2,
                     1
                 ])),
+                scaledDown: 6,
             });
         });
         test('lower triangular on left hand side', () => {
@@ -274,6 +277,7 @@ describe('Testing Matrix', () => {
                     2,
                     3,
                 ])),
+                scaledDown: 6,
             });
         });
     });
@@ -312,6 +316,13 @@ describe('Testing Matrix', () => {
                 0, 1/4, 0,
                 0, 0, 1,
             ])).det()).toBeCloseTo(1/16);
+        });
+        test('rotation of 45 degrees', () => {
+            expect(new Matrix(3, 3, new Float32Array([
+                Math.sqrt(2)/2, -Math.sqrt(2)/2, 0,
+                Math.sqrt(2)/2, Math.sqrt(2)/2, 0,
+                0, 0, 1,
+            ])).det()).toBeCloseTo(1);
         });
     });
     describe('inverse', () => {

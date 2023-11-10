@@ -217,6 +217,7 @@ export class Matrix {
      * @returns {{
      *  leftHandSide: Matrix;
      *  rightHandSide: Matrix;
+     *  scaledDown: number;
      * }}
      */
     gje(rightHandSide) {
@@ -225,6 +226,8 @@ export class Matrix {
         if (leftHandSide.rows !== rightHandSide.rows) {
             throw Error('Invalid linear system.');
         }
+        let swaps = 0;
+        let totalScale = 1;
         // put left matrix into row echelon
         for (let row = 0; row < Math.min(leftHandSide.rows, leftHandSide.cols); row++) {
             let scaleFactor = leftHandSide.get(row, row);
@@ -243,11 +246,12 @@ export class Matrix {
                     // The matrix is singular and there isn't a unique solution.
                     continue;
                 }
+                swaps++;
                 leftHandSide.rowSwap(row, swap);
                 rightHandSide.rowSwap(row, swap);
                 scaleFactor = leftHandSide.get(row, row);
             }
-
+            totalScale *= scaleFactor;
             const leftHandRow = leftHandSide.slice(0, leftHandSide.cols, row, row+1);
             leftHandRow.assume(leftHandRow.multiply(1 / scaleFactor ));
             const rightHandRow = rightHandSide.slice(0, rightHandSide.cols, row, row+1);
@@ -279,6 +283,7 @@ export class Matrix {
         return {
             leftHandSide,
             rightHandSide,
+            scaledDown: (-1) ** swaps * totalScale,
         }
     }
 
@@ -286,12 +291,12 @@ export class Matrix {
         if (this.rows !== this.cols) {
             throw Error('Can only compute the determinant of a square matrix');
         }
-        const { leftHandSide, rightHandSide } = this.gje(new Matrix(this.rows, 1, new Float32Array(Array.from(Array(this.rows), () => 1))));
+        const { leftHandSide, scaledDown } = this.gje(new Matrix(this.rows, 1));
         let determinant = 1;
         for (let i = 0; i < this.rows; i++) {
-            determinant *= leftHandSide.get(i, i) / rightHandSide.get(0, i);
+            determinant *= leftHandSide.get(i, i);
         }
-        return determinant;
+        return determinant * scaledDown;
     }
 
     /**
