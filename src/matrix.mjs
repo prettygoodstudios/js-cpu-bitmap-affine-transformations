@@ -139,8 +139,9 @@ export class Matrix {
     }
 
     /**
-     * Performs Gauss Jordan Elimination on a linear system
-     * Doesn't mutate matrix or right hand side
+     * Performs Gauss Jordan Elimination on a linear system.
+     * The matrix is the left hand side of the system.
+     * Doesn't mutate matrix or right hand side.
      * @param {Matrix} rightHandSide 
      * @returns {{
      *  leftHandSide: Matrix;
@@ -150,13 +151,17 @@ export class Matrix {
     gje(rightHandSide) {
         rightHandSide = rightHandSide.copy();
         const leftHandSide = this.copy();
+        if (leftHandSide.rows !== rightHandSide.rows) {
+            throw Error('Invalid linear system.');
+        }
         // put left matrix into row echelon
-        for (let i = 0; i < this.rows; i++) {
+        for (let i = 0; i < Math.min(leftHandSide.rows, leftHandSide.cols); i++) {
             let scaleFactor = leftHandSide.get(i, i);
             // We need to perform a row swap
             if (Math.abs(scaleFactor) < Number.EPSILON) {
+                // Finding row to swap
                 let swap;
-                for (let r = i; r < this.rows; r++) {
+                for (let r = i; r < leftHandSide.rows; r++) {
                     if (Math.abs(leftHandSide.get(i, r)) >= Number.EPSILON) {
                         swap = r;
                         break;
@@ -165,27 +170,31 @@ export class Matrix {
                 if (swap === undefined) {
                     throw Error(`The matrix is singular. There is not a unique solution to the system.`);
                 }
-                for (let c = 0; c < this.rows; c++) {
+                for (let c = 0; c < leftHandSide.cols; c++) {
                     const myValue = leftHandSide.get(c, i);
-                    const rightHandSideMyValue = rightHandSide.get(c, i);
                     leftHandSide.set(c, i, leftHandSide.get(c, swap));
                     leftHandSide.set(c, swap, myValue);
+                }
+                for (let c = 0; c < rightHandSide.cols; c++) {
+                    const rightHandSideMyValue = rightHandSide.get(c, i);
                     rightHandSide.set(c, i, rightHandSide.get(c, swap));
                     rightHandSide.set(c, swap, rightHandSideMyValue);
                 }
                 scaleFactor = leftHandSide.get(i, i);
             }
 
-            for (let c = 0; c < this.rows; c++) {
+            for (let c = 0; c < leftHandSide.cols; c++) {
                 leftHandSide.set(c, i, leftHandSide.get(c, i) / scaleFactor);
-               rightHandSide.set(c, i,rightHandSide.get(c, i) / scaleFactor);
             }
-            if (i === this.rows - 1) {
+            for (let c = 0; c < rightHandSide.cols; c++) {
+                rightHandSide.set(c, i, rightHandSide.get(c, i) / scaleFactor);
+            }
+            if (i === leftHandSide.rows - 1) {
                 continue;
             }
-            for (let j = i+1; j < this.rows; j++) {
+            for (let j = i+1; j < leftHandSide.rows; j++) {
                 const multiples = leftHandSide.get(i, j);
-                for (let c = 0; c < this.rows; c++) {
+                for (let c = 0; c < leftHandSide.rows; c++) {
                     const subtract = leftHandSide.get(c, i) * multiples;
                     const subtractRightHandSide = rightHandSide.get(c, i) * multiples;
                     leftHandSide.set(c, j, leftHandSide.get(c, j) - subtract);
@@ -194,13 +203,15 @@ export class Matrix {
             }
         }
         // convert left into reduced row echelon
-        for (let i = this.rows - 1; i > 0; i--) {
+        for (let i = leftHandSide.rows - 1; i > 0; i--) {
             for (let r = i-1; r >= 0; r--) {
                 const multiples = leftHandSide.get(i, r);
-                for (let c = 0; c < this.rows; c++) {
+                for (let c = 0; c < leftHandSide.cols; c++) {
                     const subtract = leftHandSide.get(c, i) * multiples;
-                    const subtractRightHandSide = rightHandSide.get(c, i) * multiples;
                     leftHandSide.set(c, r, leftHandSide.get(c, r) - subtract);
+                }
+                for (let c = 0; c < rightHandSide.cols; c++) {
+                    const subtractRightHandSide = rightHandSide.get(c, i) * multiples;
                     rightHandSide.set(c, r, rightHandSide.get(c, r) - subtractRightHandSide);
                 }
             }
@@ -224,7 +235,6 @@ export class Matrix {
             identity.set(i, i, 1);
         }
         const { rightHandSide } = this.gje(identity);
-        
         return rightHandSide;
     }
 
