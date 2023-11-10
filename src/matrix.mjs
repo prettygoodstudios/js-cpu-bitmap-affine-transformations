@@ -87,7 +87,9 @@ export class Matrix {
     }
 
     /**
-     * 
+     * Returns a view of a sub matrix.
+     * IT'S NOT A COPY! mutations to the view will mutate the matrix.
+     * This is intentional as it allows for easily performing elementary row operations on linear systems
      * @param {number} colStart
      * @param {number} colEnd
      * @param {number} rowStart
@@ -168,7 +170,7 @@ export class Matrix {
                     }
                 }
                 if (swap === undefined) {
-                    throw Error(`The matrix is singular. There is not a unique solution to the system.`);
+                    throw Error('The matrix is singular. There is not a unique solution to the system.');
                 }
                 for (let c = 0; c < leftHandSide.cols; c++) {
                     const myValue = leftHandSide.get(c, i);
@@ -194,10 +196,12 @@ export class Matrix {
             }
             for (let j = i+1; j < leftHandSide.rows; j++) {
                 const multiples = leftHandSide.get(i, j);
-                for (let c = 0; c < leftHandSide.rows; c++) {
+                for (let c = 0; c < leftHandSide.cols; c++) {
                     const subtract = leftHandSide.get(c, i) * multiples;
-                    const subtractRightHandSide = rightHandSide.get(c, i) * multiples;
                     leftHandSide.set(c, j, leftHandSide.get(c, j) - subtract);
+                }
+                for (let c = 0; c < rightHandSide.cols; c++) {
+                    const subtractRightHandSide = rightHandSide.get(c, i) * multiples;
                     rightHandSide.set(c, j, rightHandSide.get(c, j) - subtractRightHandSide);
                 }
             }
