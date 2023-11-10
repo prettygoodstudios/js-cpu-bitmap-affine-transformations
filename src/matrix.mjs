@@ -68,10 +68,22 @@ export class Matrix {
 
     /**
      * 
-     * @param {Matrix} other
+     * @param {number|Matrix} other
      * @return {Matrix}
      */
     multiply(other) {
+        if (typeof other === 'number') {
+            const output = new Matrix(this.rows, this.cols);
+            for (let row = 0; row < this.rows; row++) {
+                for (let col = 0; col < this.cols; col++) {
+                    output.set(col, row, this.get(col, row) * other);
+                }
+            }
+            return output;
+        }
+        if (!other instanceof Matrix) {
+            throw Error('Can only multiply by matrix.');
+        }
         if (other.rows !== this.cols) {
             throw Error(`The left matrices number of columns must equal the right's number of rows`);
         }
@@ -84,6 +96,63 @@ export class Matrix {
             }
         }
         return output;
+    }
+
+    /**
+     * 
+     * @param {number|Matrix} other
+     * @return {Matrix}
+     */
+    add(other) {
+        const output = new Matrix(this.rows, this.cols);
+        if (typeof other === 'number') {
+            for (let row = 0; row < this.rows; row++) {
+                for (let col = 0; col < this.cols; col++) {
+                    output.set(col, row, this.get(col, row) + other);
+                }
+            }
+            return output;
+        }
+        if (!other instanceof Matrix) {
+            throw Error('Can only multiply by matrix.');
+        }
+        if (other.rows !== this.rows || other.cols !== this.cols) {
+            throw Error(`The matrices must have the same dimensions`);
+        }
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                output.set(col, row, this.get(col, row) + other.get(col, row));
+            }
+        }
+        return output;
+    }
+
+    /**
+     * Assumes data from other matrix
+     * @param {Matrix} other
+     */
+    assume(other) {
+        if (other.cols !== this.cols || other.rows !== this.rows) {
+            throw Error('Can only assume data from matrix with same dimensions.');
+        }
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                this.set(col, row, other.get(col, row));
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param {number} rowIndexOne 
+     * @param {number} rowIndexTwo 
+     */
+    rowSwap(rowIndexOne, rowIndexTwo) {
+        const rowOne = this.slice(0, this.cols+1, rowIndexOne, rowIndexOne+1);
+        const rowOneCopy = rowOne.copy();
+        const rowTwo = this.slice(0, this.cols+1, rowIndexTwo, rowIndexTwo+1);
+        rowOne.assume(rowTwo);
+        rowTwo.assume(rowOneCopy);
     }
 
     /**
@@ -157,14 +226,14 @@ export class Matrix {
             throw Error('Invalid linear system.');
         }
         // put left matrix into row echelon
-        for (let i = 0; i < Math.min(leftHandSide.rows, leftHandSide.cols); i++) {
-            let scaleFactor = leftHandSide.get(i, i);
+        for (let row = 0; row < Math.min(leftHandSide.rows, leftHandSide.cols); row++) {
+            let scaleFactor = leftHandSide.get(row, row);
             // We need to perform a row swap
             if (Math.abs(scaleFactor) < Number.EPSILON) {
                 // Finding row to swap
                 let swap;
-                for (let r = i; r < leftHandSide.rows; r++) {
-                    if (Math.abs(leftHandSide.get(i, r)) >= Number.EPSILON) {
+                for (let r = row; r < leftHandSide.rows; r++) {
+                    if (Math.abs(leftHandSide.get(row, r)) >= Number.EPSILON) {
                         swap = r;
                         break;
                     }
@@ -172,52 +241,37 @@ export class Matrix {
                 if (swap === undefined) {
                     throw Error('The matrix is singular. There is not a unique solution to the system.');
                 }
-                for (let c = 0; c < leftHandSide.cols; c++) {
-                    const myValue = leftHandSide.get(c, i);
-                    leftHandSide.set(c, i, leftHandSide.get(c, swap));
-                    leftHandSide.set(c, swap, myValue);
-                }
-                for (let c = 0; c < rightHandSide.cols; c++) {
-                    const rightHandSideMyValue = rightHandSide.get(c, i);
-                    rightHandSide.set(c, i, rightHandSide.get(c, swap));
-                    rightHandSide.set(c, swap, rightHandSideMyValue);
-                }
-                scaleFactor = leftHandSide.get(i, i);
+                leftHandSide.rowSwap(row, swap);
+                rightHandSide.rowSwap(row, swap);
+                scaleFactor = leftHandSide.get(row, row);
             }
 
-            for (let c = 0; c < leftHandSide.cols; c++) {
-                leftHandSide.set(c, i, leftHandSide.get(c, i) / scaleFactor);
-            }
-            for (let c = 0; c < rightHandSide.cols; c++) {
-                rightHandSide.set(c, i, rightHandSide.get(c, i) / scaleFactor);
-            }
-            if (i === leftHandSide.rows - 1) {
+            const leftHandRow = leftHandSide.slice(0, leftHandSide.cols, row, row+1);
+            leftHandRow.assume(leftHandRow.multiply(1 / scaleFactor ));
+            const rightHandRow = rightHandSide.slice(0, rightHandSide.cols, row, row+1);
+            rightHandRow.assume(rightHandRow.multiply(1 / scaleFactor ));
+
+            if (row === leftHandSide.rows - 1) {
                 continue;
             }
-            for (let j = i+1; j < leftHandSide.rows; j++) {
-                const multiples = leftHandSide.get(i, j);
-                for (let c = 0; c < leftHandSide.cols; c++) {
-                    const subtract = leftHandSide.get(c, i) * multiples;
-                    leftHandSide.set(c, j, leftHandSide.get(c, j) - subtract);
-                }
-                for (let c = 0; c < rightHandSide.cols; c++) {
-                    const subtractRightHandSide = rightHandSide.get(c, i) * multiples;
-                    rightHandSide.set(c, j, rightHandSide.get(c, j) - subtractRightHandSide);
-                }
+            for (let bottomRow = row+1; bottomRow < leftHandSide.rows; bottomRow++) {
+                const multiples = leftHandSide.get(row, bottomRow);
+                const leftHandBottomRow = leftHandSide.slice(0, leftHandSide.cols, bottomRow, bottomRow+1);
+                leftHandBottomRow.assume(leftHandBottomRow.add(leftHandRow.multiply(-multiples)));
+                const rightHandBottomRow = rightHandSide.slice(0, rightHandSide.cols, bottomRow, bottomRow+1);
+                rightHandBottomRow.assume(rightHandBottomRow.add(rightHandRow.multiply(-multiples)));
             }
         }
         // convert left into reduced row echelon
-        for (let i = leftHandSide.rows - 1; i > 0; i--) {
-            for (let r = i-1; r >= 0; r--) {
-                const multiples = leftHandSide.get(i, r);
-                for (let c = 0; c < leftHandSide.cols; c++) {
-                    const subtract = leftHandSide.get(c, i) * multiples;
-                    leftHandSide.set(c, r, leftHandSide.get(c, r) - subtract);
-                }
-                for (let c = 0; c < rightHandSide.cols; c++) {
-                    const subtractRightHandSide = rightHandSide.get(c, i) * multiples;
-                    rightHandSide.set(c, r, rightHandSide.get(c, r) - subtractRightHandSide);
-                }
+        for (let row = leftHandSide.rows - 1; row > 0; row--) {
+            const leftHandRow = leftHandSide.slice(0, leftHandSide.cols, row, row+1);
+            const rightHandRow = rightHandSide.slice(0, rightHandSide.cols, row, row+1);
+            for (let topRow = row-1; topRow >= 0; topRow--) {
+                const multiples = leftHandSide.get(row, topRow);
+                const leftHandTopRow = leftHandSide.slice(0, leftHandSide.cols, topRow, topRow+1);
+                leftHandTopRow.assume(leftHandTopRow.add(leftHandRow.multiply(-multiples)));
+                const rightHandTopRow = rightHandSide.slice(0, rightHandSide.cols, topRow, topRow+1);
+                rightHandTopRow.assume(rightHandTopRow.add(rightHandRow.multiply(-multiples)));
             }
         }
         return {
@@ -243,7 +297,7 @@ export class Matrix {
     }
 
     copy() {
-        return new Matrix(this.rows, this.cols, new Float32Array(this._data));
+        return new Matrix(this.rows, this.cols, new Float32Array(this._data), this._dataRowSize, this._rowOffset, this._colOffset);
     }
 
     toString() {
