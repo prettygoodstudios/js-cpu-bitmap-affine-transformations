@@ -12,6 +12,30 @@
                 <label for="transform">Transform:</label>
                 <input id="transform" placeholder="Transform i.e. translate(100, 100) rotate(45) scale(2)"/>
                 <button>Apply!</button>
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="3">The generated transform matrix</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transformMatrixBody">
+                        <tr>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                        <tr>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                        </tr>
+                        <tr>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>1</td>
+                        </tr>
+                    </tbody>
+                </table>
             </form>
             <div class="InfoSection__documentation">
                 <p>Note: The transform origin is set to the center of the image, and the transform functions don't support units in arguments. Rotate uses degrees and translate uses pixels i.e.</p>
@@ -78,8 +102,7 @@
                 </table>
             </div>
         </div>
-        <div id="transformWrapper">
-        </div>
+        <div id="transformWrapper"></div>
         <script src="./src/index.js" type="module"></script>
     </body>
 </html>

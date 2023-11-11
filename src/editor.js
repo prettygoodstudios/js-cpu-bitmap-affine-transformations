@@ -1,5 +1,5 @@
 import { imageDataToImage, getBitmapFromImageSource } from './bitmap.mjs';
-import { transform } from './transform.mjs';
+import { computeTransformMatrix, transform } from './transform.mjs';
 
 export function setupEditor() {
     /**
@@ -44,7 +44,22 @@ export function setupEditor() {
         if (selectedImageData) {
             const copyOfSelectedImageData = new ImageData(selectedImageData.width, selectedImageData.height);
             copyOfSelectedImageData.data.set(selectedImageData.data);
-            const { newImageData, left, top } = transform(copyOfSelectedImageData, `${transformInput.value} scale(1)`);
+            const commandString = `${transformInput.value} scale(1)`;
+            const { newImageData, left, top } = transform(copyOfSelectedImageData, commandString);
+            const transformMatrix = computeTransformMatrix(commandString);
+            /** @type {HTMLTableSectionElement} */
+            const transformMatrixBody = document.querySelector('#transformMatrixBody');
+            const tableRows = [];
+            for (let row = 0; row < transformMatrix.rows; row++) {
+                const tableRow = document.createElement('tr');
+                for (let col = 0; col < transformMatrix.cols; col++) {
+                    const tableCell = document.createElement('td');
+                    tableCell.innerText = transformMatrix.get(col, row);
+                    tableRow.appendChild(tableCell);
+                }
+                tableRows.push(tableRow);
+            }
+            transformMatrixBody.replaceChildren(...tableRows);
             const newImage = imageDataToImage(newImageData);
             const targetElement = transformWrapper.querySelector('img');
             targetElement.src = newImage;
