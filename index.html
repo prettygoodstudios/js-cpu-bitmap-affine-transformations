@@ -10,13 +10,72 @@
                 <label for="imageInput">Select Image:</label>
                 <input accept=".png,.jpeg,.jpg,.svg" type="file" id="imageInput"/>
                 <label for="transform">Transform:</label>
-                <input id="transform" placeholder="transform"/>
+                <input id="transform" placeholder="Transform i.e. translate(100, 100) rotate(45) scale(2)"/>
                 <button>Apply!</button>
             </form>
             <div class="InfoSection__documentation">
                 <p>Note: The transform origin is set to the center of the image, and the transform functions don't support units in arguments. Rotate uses degrees and translate uses pixels i.e.</p>
                 <pre>translate(100, 100) rotate(45) scale(2)</pre>
                 <p>Scales it up by a factor of 2, rotates by 45 degrees and then translates it 100px to the right and 100px down.</p>
+                <p>Below is a table of supported commands</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Command</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><pre>scale(factor)</pre></td>
+                            <td>
+                                <pre>scale(5)</pre>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><pre>scale(factorX, factorY)</pre></td>
+                            <td>
+                                <pre>scale(1, 2)</pre>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><pre>scaleX(factorX)</pre></td>
+                            <td>
+                                <pre>scaleX(3)</pre>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><pre>scaleY(factorY)</pre></td>
+                            <td>
+                                <pre>scaleY(2)</pre>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><pre>rotate(degrees)</pre></td>
+                            <td>
+                                <pre>rotate(45)</pre>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><pre>translate(x, y)</pre></td>
+                            <td>
+                                <pre>translate(100, 200)</pre>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><pre>translateX(x)</pre></td>
+                            <td>
+                                <pre>translateX(100)</pre>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><pre>translateY(y)</pre></td>
+                            <td>
+                                <pre>translateY(200)</pre>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         <div id="transformWrapper">
