@@ -324,6 +324,23 @@ describe('Testing Matrix', () => {
                 0, 0, 1,
             ])).det()).toBeCloseTo(1);
         });
+        test('matrix with zeroes in the middle column', () => {
+            expect(new Matrix(3, 3, new Float32Array([
+                2, 0, -2,
+                2, 0, 2,
+                0, 1, 0,
+            ])).det()).toBeCloseTo(-8);
+            expect(new Matrix(3, 3, new Float32Array([
+                2, 0, -2,
+                0, 1, 0,
+                2, 0, 2,
+            ])).det()).toBeCloseTo(8);
+            expect(new Matrix(3, 3, new Float32Array([
+                2, 0, -2,
+                55, 1, 23,
+                2, 0, 2,
+            ])).det()).toBeCloseTo(8);
+        });
     });
     describe('inverse', () => {
         test('identity', () => {
