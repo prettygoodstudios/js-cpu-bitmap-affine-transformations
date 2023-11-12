@@ -65,6 +65,12 @@ export function setupEditor() {
             targetElement.src = newImage;
             targetElement.style.left = `${left}px`;
             targetElement.style.top = `${top}px`;
+            /** @type {HTMLAnchorElement} */
+            const downloadButton = document.querySelector('#download') ?? imageForm.appendChild(document.createElement(('a')));
+            downloadButton.id = 'download';
+            downloadButton.href = newImage;
+            downloadButton.download = 'transformed';
+            downloadButton.innerText = 'Download Transformed Image';
         }
     };
 }
