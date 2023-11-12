@@ -71,6 +71,10 @@ export function setupEditor() {
             downloadButton.href = newImage;
             downloadButton.download = 'transformed';
             downloadButton.innerText = 'Download Transformed Image';
+            /** @type {HTMLParagraphElement} */
+            const downloadDisclaimer = document.querySelector('#downloadDisclaimer') ?? imageForm.appendChild(document.createElement(('p')));
+            downloadDisclaimer.innerText = 'Note: The download only includes the portion of the transformed image in the bounding box. Therefore, translations won\'t show up in the the download.';
+            downloadDisclaimer.id = 'downloadDisclaimer';
         }
     };
 }
