@@ -29,6 +29,30 @@ If you're unfamiliar with these topics, the following are good resources:
 
 * If you want to explore linear algebra more in depth, the legendary Gilbert Strang's [Introduction to Linear Algebra](https://math.mit.edu/~gs/linearalgebra/ila5/indexila5.html) is a great book and was the book that was used in the linear algebra course I took in college.
 
+## General Overview of Code Base
+
+* [Matrix](./src/matrix.mjs) A class that has methods for basic operations that can be performed on matrices and vectors (Matrices that have one dimension of size 1 can use the vector operations)
+
+* [scale(x, y)](./src/transform.mjs) A function that generates a scale matrix
+
+* [rotate(degrees)](./src/transform.mjs) A function that generates a rotation matrix
+
+* [translate(x, y)](./src/transform.mjs) A function that generates a translation matrix
+
+* [parseTransformCommands(commands)](./src/transform.mjs) Parses a string containing transform commands into an array of command objects
+
+* [computeTransformMatrix(commands)](./src/transform.mjs) Takes a string containing transform commands and returns a matrix encoding the associated affine transformations
+
+* [transform(imageData, commands)](./src/transform.mjs) Takes [ImageData](https://developer.mozilla.org/en-US/docs/Web/API/ImageData) and transform commands and returns a copy of the [ImageData](https://developer.mozilla.org/en-US/docs/Web/API/ImageData) with the commands applied
+
+* [getBitmap(selector)](./src/bitmap.mjs) Takes a CSS selector and returns the image data of the selected image
+
+* [imageDataToImage(imageData)](./src/bitmap.mjs) Produces a data url from the provided image data
+
+* [getPixel(imageData, x, y)](./src/bitmap.mjs) Returns an [Uint8ClampedArray](./https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray) of the RGBA values of the selected pixel
+
+* [setPixel(imageData, x, y, color)](./src/bitmap.mjs) Writes a RGBA color to the image data at the specified pixel
+
 ## Unit tests
 
 If you would like to contribute to this project, there is a suite of tests written with [Jest](https://jestjs.io). These tests can be ran by running `sh tests.sh` (will not work on Windows) from the `tests` directory. This project is also configured to work with VSCode's Jest extension and the test suite can be ran and debugged via it.
