@@ -211,9 +211,10 @@ export class Matrix {
             throw Error('Invalid matrices provided for dot product');
         }
         let dotProduct = 0;
-        // for (let i = 0; i < myDimensions; i++) {
-        //     dotProduct += getMyValue(i) * getVectorValue(i);
-        // }
+        for (let i = 0; i < myDimensions; i++) {
+            dotProduct += getMyValue(i) * getVectorValue(i);
+        }
+        // hello
         return dotProduct;
     }
 
