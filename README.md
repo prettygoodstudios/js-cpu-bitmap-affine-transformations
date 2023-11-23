@@ -55,8 +55,22 @@ If you're unfamiliar with these topics, the following are good resources:
 
 ## Unit tests
 
-If you would like to contribute to this project, there is a suite of tests written with [Jest](https://jestjs.io). These tests can be ran by running `./tests.sh` (will not work on Windows) from the [tests](./tests) directory. This project is also configured to work with VSCode's Jest extension and the test suite can be ran and debugged via it.
+If you would like to contribute to this project, there is a suite of tests written with [Jest](https://jestjs.io) located in the [tests](./tests) directory. 
 
+### Setup
+
+* Jest requires `Node.js` and npm to be installed. See this [guide](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) for instructions, if you don't have it installed. 
+
+* After this you'll need to have Jest installed globally which can be done by running `npm i -g jest`.
+
+### Running the tests
+
+* These tests can be ran by running `./tests.sh` (will not work on Windows) from the [tests](./tests) directory. 
+* This project is also configured to work with [VSCode's](https://code.visualstudio.com) [Jest extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest) and the test suite can be ran and debugged via it.
+
+## CI and contributing
+
+This repository has a Github action that will run the test suite, after every push. The file that defines it is located here [./github/workflows/node.js.yml](./github/workflows/node.js.yml).  Pushing directly to master is not permitted. Github will only permit merging into master, after the action passes.
 
 
 
