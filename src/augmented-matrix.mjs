@@ -4,14 +4,14 @@ export class AugmentedMatrix {
     /**
      * 
      * @param {Matrix} leftHandSide 
-     * @param {Matrix} rightHandSide 
+     * @param {Matrix=} rightHandSide 
      */
     constructor(leftHandSide, rightHandSide) {
-        if (leftHandSide.rows !== rightHandSide.rows) {
+        if (rightHandSide && leftHandSide.rows !== rightHandSide.rows) {
             throw Error('The left hand side must have the same number of rows as the right hand side');
         }
         this._leftHandSide = leftHandSide;
-        this._rightHandSide = rightHandSide;
+        this._rightHandSide = rightHandSide ?? new Matrix(leftHandSide.rows, 0);
     }
 
     /**
