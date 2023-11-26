@@ -1,3 +1,5 @@
+import { AugmentedMatrix } from "./augmented-matrix.mjs";
+
 export class Matrix {
     /**
      * 
@@ -230,91 +232,12 @@ export class Matrix {
         }
     }
 
-    /**
-     * @param {Matrix} leftHandSide
-     * @param {Matrix} rightHandSide
-     * @param {number} baseRow 
-     * @param {'up'|'down'} direction 
-     */
-    static _clearOutRows(leftHandSide, rightHandSide, baseRow, direction) {
-        const delta = direction === 'up' ? -1 : 1;
-        /**
-         * @param {number} row 
-         * @returns {boolean}
-         */
-        const condition = (row) => {
-            if (direction === 'up') {
-                return row >= 0;
-            }
-            return row < leftHandSide.rows;
-        };
-        const leftHandRow = leftHandSide.slice(0, leftHandSide.cols, baseRow, baseRow+1);
-        const rightHandRow = rightHandSide.slice(0, rightHandSide.cols, baseRow, baseRow+1);
-        for (let targetRow = baseRow+delta; condition(targetRow); targetRow += delta) {
-            const multiples = leftHandSide.get(baseRow, targetRow);
-            const leftHandTargetRow = leftHandSide.slice(0, leftHandSide.cols, targetRow, targetRow+1);
-            leftHandTargetRow.add(leftHandRow.multiply(-multiples), leftHandTargetRow);
-            const rightHandTargetRow = rightHandSide.slice(0, rightHandSide.cols, targetRow, targetRow+1);
-            rightHandTargetRow.add(rightHandRow.multiply(-multiples), rightHandTargetRow);
-        }
-    }
-
-    /**
-     * Performs Gauss Jordan Elimination on a linear system.
-     * The matrix is the left hand side of the system.
-     * Doesn't mutate matrix or right hand side.
-     * @param {Matrix} rightHandSide 
-     * @returns {{
-     *  leftHandSide: Matrix;
-     *  rightHandSide: Matrix;
-     *  scaledDown: number;
-     * }}
-     */
-    gje(rightHandSide) {
-        rightHandSide = rightHandSide.copy();
-        const leftHandSide = this.copy();
-        if (leftHandSide.rows !== rightHandSide.rows) {
-            throw Error('Invalid linear system.');
-        }
-        let swaps = 0;
-        let totalScale = 1;
-        // put left matrix into row echelon
-        for (let row = 0; row < Math.min(leftHandSide.rows, leftHandSide.cols); row++) {
-            let scaleFactor = leftHandSide.get(row, row);
-            const pivot = leftHandSide.findFirstRowWithPivot(row);
-            if (pivot === undefined) {
-                // There's not a pivot for this row so no need to clear out the rows below
-                continue;
-            }
-            if (pivot !== row) {
-                swaps++;
-                leftHandSide.rowSwap(row, pivot);
-                rightHandSide.rowSwap(row, pivot);
-                scaleFactor = leftHandSide.get(row, row);
-            }
-            totalScale *= scaleFactor;
-            const leftHandRow = leftHandSide.slice(0, leftHandSide.cols, row, row+1);
-            leftHandRow.multiply(1 / scaleFactor, leftHandRow);
-            const rightHandRow = rightHandSide.slice(0, rightHandSide.cols, row, row+1);
-            rightHandRow.multiply(1 / scaleFactor, rightHandRow);
-            Matrix._clearOutRows(leftHandSide, rightHandSide, row, 'down');
-        }
-        // convert left into reduced row echelon
-        for (let row = leftHandSide.rows - 1; row > 0; row--) {
-            Matrix._clearOutRows(leftHandSide, rightHandSide, row, 'up');
-        }
-        return {
-            leftHandSide,
-            rightHandSide,
-            scaledDown: (-1) ** swaps * totalScale,
-        }
-    }
-
     det() {
         if (this.rows !== this.cols) {
             throw Error('Can only compute the determinant of a square matrix');
         }
-        const { leftHandSide, scaledDown } = this.gje(new Matrix(this.rows, 1));
+        const augmentedMatrix = new AugmentedMatrix(this.copy(), new Matrix(this.rows, 1));
+        const { leftHandSide, scaledDown } = augmentedMatrix.gje();
         let determinant = 1;
         for (let i = 0; i < this.rows; i++) {
             determinant *= leftHandSide.get(i, i);
@@ -334,7 +257,8 @@ export class Matrix {
         for (let i = 0; i < this.rows; i++) {
             identity.set(i, i, 1);
         }
-        const { rightHandSide } = this.gje(identity);
+        const augmentedMatrix = new AugmentedMatrix(this.copy(), identity);
+        const { rightHandSide } = augmentedMatrix.gje();
         return rightHandSide;
     }
 
