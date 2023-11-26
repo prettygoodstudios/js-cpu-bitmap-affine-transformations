@@ -236,7 +236,7 @@ export class Matrix {
         if (this.rows !== this.cols) {
             throw Error('Can only compute the determinant of a square matrix');
         }
-        const augmentedMatrix = new AugmentedMatrix(this.copy(), new Matrix(this.rows, 1));
+        const augmentedMatrix = new AugmentedMatrix(this.copy());
         const { leftHandSide, scaledDown } = augmentedMatrix.gje();
         let determinant = 1;
         for (let i = 0; i < this.rows; i++) {
@@ -253,11 +253,7 @@ export class Matrix {
         if (this.rows !== this.cols) {
             throw Error('Can only compute inverse of a square matrix');
         }
-        const identity = new Matrix(this.rows, this.rows);
-        for (let i = 0; i < this.rows; i++) {
-            identity.set(i, i, 1);
-        }
-        const augmentedMatrix = new AugmentedMatrix(this.copy(), identity);
+        const augmentedMatrix = new AugmentedMatrix(this.copy(), Matrix.identity(this.rows));
         const { rightHandSide } = augmentedMatrix.gje();
         return rightHandSide;
     }
@@ -294,4 +290,16 @@ export class Matrix {
     get cols() {
         return this._cols;
     }
+
+    /**
+     * @param {number} size 
+     * @returns {Matrix}
+     */
+    static identity(size) {
+        const identity = new Matrix(size, size);
+        for (let i = 0; i < size; i++) {
+            identity.set(i, i, 1);
+        }
+        return identity;
+    } 
 }
