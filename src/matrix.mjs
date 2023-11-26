@@ -218,6 +218,48 @@ export class Matrix {
     }
 
     /**
+     * Finds the index of the first row with a pivot
+     * @param {number} column 
+     * @return {number|undefined} index if found otherwise undefined
+     */
+    findFirstRowWithPivot(column) {
+        for (let row = column; row < this.rows; row++) {
+            if (Math.abs(this.get(column, row)) >= Number.EPSILON) {
+                return row;
+            }
+        }
+    }
+
+    /**
+     * @param {Matrix} leftHandSide
+     * @param {Matrix} rightHandSide
+     * @param {number} baseRow 
+     * @param {'up'|'down'} direction 
+     */
+    static _clearOutRows(leftHandSide, rightHandSide, baseRow, direction) {
+        const delta = direction === 'up' ? -1 : 1;
+        /**
+         * @param {number} row 
+         * @returns {boolean}
+         */
+        const condition = (row) => {
+            if (direction === 'up') {
+                return row >= 0;
+            }
+            return row < leftHandSide.rows;
+        };
+        const leftHandRow = leftHandSide.slice(0, leftHandSide.cols, baseRow, baseRow+1);
+        const rightHandRow = rightHandSide.slice(0, rightHandSide.cols, baseRow, baseRow+1);
+        for (let targetRow = baseRow+delta; condition(targetRow); targetRow += delta) {
+            const multiples = leftHandSide.get(baseRow, targetRow);
+            const leftHandTargetRow = leftHandSide.slice(0, leftHandSide.cols, targetRow, targetRow+1);
+            leftHandTargetRow.add(leftHandRow.multiply(-multiples), leftHandTargetRow);
+            const rightHandTargetRow = rightHandSide.slice(0, rightHandSide.cols, targetRow, targetRow+1);
+            rightHandTargetRow.add(rightHandRow.multiply(-multiples), rightHandTargetRow);
+        }
+    }
+
+    /**
      * Performs Gauss Jordan Elimination on a linear system.
      * The matrix is the left hand side of the system.
      * Doesn't mutate matrix or right hand side.
@@ -239,24 +281,15 @@ export class Matrix {
         // put left matrix into row echelon
         for (let row = 0; row < Math.min(leftHandSide.rows, leftHandSide.cols); row++) {
             let scaleFactor = leftHandSide.get(row, row);
-            // We need to perform a row swap
-            if (Math.abs(scaleFactor) < Number.EPSILON) {
-                // Finding row to swap
-                let swap;
-                for (let r = row; r < leftHandSide.rows; r++) {
-                    if (Math.abs(leftHandSide.get(row, r)) >= Number.EPSILON) {
-                        swap = r;
-                        break;
-                    }
-                }
-                if (swap === undefined) {
-                    // The matrix doesn't have a pivot for this row
-                    // The matrix is singular and there isn't a unique solution.
-                    continue;
-                }
+            const pivot = leftHandSide.findFirstRowWithPivot(row);
+            if (pivot === undefined) {
+                // There's not a pivot for this row so no need to clear out the rows below
+                continue;
+            }
+            if (pivot !== row) {
                 swaps++;
-                leftHandSide.rowSwap(row, swap);
-                rightHandSide.rowSwap(row, swap);
+                leftHandSide.rowSwap(row, pivot);
+                rightHandSide.rowSwap(row, pivot);
                 scaleFactor = leftHandSide.get(row, row);
             }
             totalScale *= scaleFactor;
@@ -264,29 +297,11 @@ export class Matrix {
             leftHandRow.multiply(1 / scaleFactor, leftHandRow);
             const rightHandRow = rightHandSide.slice(0, rightHandSide.cols, row, row+1);
             rightHandRow.multiply(1 / scaleFactor, rightHandRow);
-
-            if (row === leftHandSide.rows - 1) {
-                continue;
-            }
-            for (let bottomRow = row+1; bottomRow < leftHandSide.rows; bottomRow++) {
-                const multiples = leftHandSide.get(row, bottomRow);
-                const leftHandBottomRow = leftHandSide.slice(0, leftHandSide.cols, bottomRow, bottomRow+1);
-                leftHandBottomRow.add(leftHandRow.multiply(-multiples), leftHandBottomRow);
-                const rightHandBottomRow = rightHandSide.slice(0, rightHandSide.cols, bottomRow, bottomRow+1);
-                rightHandBottomRow.add(rightHandRow.multiply(-multiples), rightHandBottomRow);
-            }
+            Matrix._clearOutRows(leftHandSide, rightHandSide, row, 'down');
         }
         // convert left into reduced row echelon
         for (let row = leftHandSide.rows - 1; row > 0; row--) {
-            const leftHandRow = leftHandSide.slice(0, leftHandSide.cols, row, row+1);
-            const rightHandRow = rightHandSide.slice(0, rightHandSide.cols, row, row+1);
-            for (let topRow = row-1; topRow >= 0; topRow--) {
-                const multiples = leftHandSide.get(row, topRow);
-                const leftHandTopRow = leftHandSide.slice(0, leftHandSide.cols, topRow, topRow+1);
-                leftHandTopRow.add(leftHandRow.multiply(-multiples), leftHandTopRow);
-                const rightHandTopRow = rightHandSide.slice(0, rightHandSide.cols, topRow, topRow+1);
-                rightHandTopRow.add(rightHandRow.multiply(-multiples), rightHandTopRow);
-            }
+            Matrix._clearOutRows(leftHandSide, rightHandSide, row, 'up');
         }
         return {
             leftHandSide,
