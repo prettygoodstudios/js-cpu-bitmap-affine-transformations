@@ -1,3 +1,5 @@
+import { AugmentedMatrix } from "./augmented-matrix.mjs";
+
 export class Matrix {
     /**
      * 
@@ -218,80 +220,15 @@ export class Matrix {
     }
 
     /**
-     * Performs Gauss Jordan Elimination on a linear system.
-     * The matrix is the left hand side of the system.
-     * Doesn't mutate matrix or right hand side.
-     * @param {Matrix} rightHandSide 
-     * @returns {{
-     *  leftHandSide: Matrix;
-     *  rightHandSide: Matrix;
-     *  scaledDown: number;
-     * }}
+     * Finds the index of the first row with a pivot
+     * @param {number} column 
+     * @return {number|undefined} index if found otherwise undefined
      */
-    gje(rightHandSide) {
-        rightHandSide = rightHandSide.copy();
-        const leftHandSide = this.copy();
-        if (leftHandSide.rows !== rightHandSide.rows) {
-            throw Error('Invalid linear system.');
-        }
-        let swaps = 0;
-        let totalScale = 1;
-        // put left matrix into row echelon
-        for (let row = 0; row < Math.min(leftHandSide.rows, leftHandSide.cols); row++) {
-            let scaleFactor = leftHandSide.get(row, row);
-            // We need to perform a row swap
-            if (Math.abs(scaleFactor) < Number.EPSILON) {
-                // Finding row to swap
-                let swap;
-                for (let r = row; r < leftHandSide.rows; r++) {
-                    if (Math.abs(leftHandSide.get(row, r)) >= Number.EPSILON) {
-                        swap = r;
-                        break;
-                    }
-                }
-                if (swap === undefined) {
-                    // The matrix doesn't have a pivot for this row
-                    // The matrix is singular and there isn't a unique solution.
-                    continue;
-                }
-                swaps++;
-                leftHandSide.rowSwap(row, swap);
-                rightHandSide.rowSwap(row, swap);
-                scaleFactor = leftHandSide.get(row, row);
+    findFirstRowWithPivot(column) {
+        for (let row = column; row < this.rows; row++) {
+            if (Math.abs(this.get(column, row)) >= Number.EPSILON) {
+                return row;
             }
-            totalScale *= scaleFactor;
-            const leftHandRow = leftHandSide.slice(0, leftHandSide.cols, row, row+1);
-            leftHandRow.multiply(1 / scaleFactor, leftHandRow);
-            const rightHandRow = rightHandSide.slice(0, rightHandSide.cols, row, row+1);
-            rightHandRow.multiply(1 / scaleFactor, rightHandRow);
-
-            if (row === leftHandSide.rows - 1) {
-                continue;
-            }
-            for (let bottomRow = row+1; bottomRow < leftHandSide.rows; bottomRow++) {
-                const multiples = leftHandSide.get(row, bottomRow);
-                const leftHandBottomRow = leftHandSide.slice(0, leftHandSide.cols, bottomRow, bottomRow+1);
-                leftHandBottomRow.add(leftHandRow.multiply(-multiples), leftHandBottomRow);
-                const rightHandBottomRow = rightHandSide.slice(0, rightHandSide.cols, bottomRow, bottomRow+1);
-                rightHandBottomRow.add(rightHandRow.multiply(-multiples), rightHandBottomRow);
-            }
-        }
-        // convert left into reduced row echelon
-        for (let row = leftHandSide.rows - 1; row > 0; row--) {
-            const leftHandRow = leftHandSide.slice(0, leftHandSide.cols, row, row+1);
-            const rightHandRow = rightHandSide.slice(0, rightHandSide.cols, row, row+1);
-            for (let topRow = row-1; topRow >= 0; topRow--) {
-                const multiples = leftHandSide.get(row, topRow);
-                const leftHandTopRow = leftHandSide.slice(0, leftHandSide.cols, topRow, topRow+1);
-                leftHandTopRow.add(leftHandRow.multiply(-multiples), leftHandTopRow);
-                const rightHandTopRow = rightHandSide.slice(0, rightHandSide.cols, topRow, topRow+1);
-                rightHandTopRow.add(rightHandRow.multiply(-multiples), rightHandTopRow);
-            }
-        }
-        return {
-            leftHandSide,
-            rightHandSide,
-            scaledDown: (-1) ** swaps * totalScale,
         }
     }
 
@@ -299,7 +236,8 @@ export class Matrix {
         if (this.rows !== this.cols) {
             throw Error('Can only compute the determinant of a square matrix');
         }
-        const { leftHandSide, scaledDown } = this.gje(new Matrix(this.rows, 1));
+        const augmentedMatrix = new AugmentedMatrix(this.copy(), new Matrix(this.rows, 1));
+        const { leftHandSide, scaledDown } = augmentedMatrix.gje();
         let determinant = 1;
         for (let i = 0; i < this.rows; i++) {
             determinant *= leftHandSide.get(i, i);
@@ -319,7 +257,8 @@ export class Matrix {
         for (let i = 0; i < this.rows; i++) {
             identity.set(i, i, 1);
         }
-        const { rightHandSide } = this.gje(identity);
+        const augmentedMatrix = new AugmentedMatrix(this.copy(), identity);
+        const { rightHandSide } = augmentedMatrix.gje();
         return rightHandSide;
     }
 
