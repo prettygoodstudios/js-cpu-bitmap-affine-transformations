@@ -171,6 +171,8 @@ export class SVGLineChartLogger extends Logger {
      */
     log(result) {
         this._data.push(result);
+        // Should probably use a heap data structure instead to make this op cheaper
+        this._data.sort((a, b) => a[this._seriesValue] - b[this._seriesValue]);
         this._render();
     }
     
