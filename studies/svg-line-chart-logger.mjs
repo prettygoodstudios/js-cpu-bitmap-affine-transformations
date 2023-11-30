@@ -31,6 +31,17 @@ export class SVGLineChartLogger extends Logger {
         return [0, Math.ceil(Math.max(...values) / 10) * 10];
     }
 
+    _domain() {
+        if (this._data.length === 0) {
+            return [0, 1];
+        }
+        if (this._data.length === 1) {
+            return [0, this._data[0][this._seriesValue] * 2];
+        }
+        const inputs = this._data.map(d => d[this._seriesValue]);
+        return [Math.floor(Math.min(...inputs) * 10) / 10, Math.ceil(Math.max(...inputs) * 10) / 10];
+    }
+
     /**
      * 
      * @param {number} value
@@ -42,7 +53,21 @@ export class SVGLineChartLogger extends Logger {
         return this._height - this._margin - (value - start) / (end - start) * pixels;
     }
 
-    _setupLine() {
+    /**
+     * 
+     * @param {unknown} seriesValue 
+     */
+    _xScale(seriesValue) {
+        if (typeof seriesValue === 'number') {
+            const padding = 20;
+            const pixels = this._width - this._margin * 2 - padding * 2;
+            const [start, end] = this._domain();
+            return this._margin + padding + (seriesValue - start) / (end - start) * pixels;
+        }
+        return 0;
+    }
+
+    _drawLine() {
         this._lineGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         this._line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         this._line.setAttribute('stroke', '#00f');
@@ -51,7 +76,7 @@ export class SVGLineChartLogger extends Logger {
         this._element.appendChild(this._lineGroup);
     }
 
-    _setupYAxis() {
+    _drawYAxis() {
         const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         const ticks = 5;
         const [start, end] = this._range();
@@ -72,6 +97,7 @@ export class SVGLineChartLogger extends Logger {
             `);
             tickNode.setAttribute('stroke', '#000');
             group.appendChild(tickNode);
+            this._drawHorizontalGridLine(y);
         }
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         line.setAttribute('d', `
@@ -98,7 +124,54 @@ export class SVGLineChartLogger extends Logger {
         });
     }
 
-    _setupXAxis() {
+    /**
+     * 
+     * @param {number} y 
+     */
+    _drawHorizontalGridLine(y) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        line.setAttribute('d', `
+            M ${this._margin}, ${y}
+            L ${this._width - this._margin}, ${y}
+        `);
+        line.setAttribute('stroke', '#bbb');
+        line.setAttribute('stroke-dasharray', '15, 10, 5, 10');
+        this._element.appendChild(line);
+    }
+
+    /**
+     * 
+     * @param {number} x
+     */
+    _drawVerticalGridLine(x) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        line.setAttribute('d', `
+            M ${x}, ${this._margin}
+            L ${x}, ${this._height - this._margin}
+        `);
+        line.setAttribute('stroke', '#bbb');
+        line.setAttribute('stroke-dasharray', '15, 10, 5, 10');
+        this._element.appendChild(line);
+    }
+
+    /**
+     * 
+     * @param {number|string} seriesValue 
+     */
+    _drawXAxisLabel(seriesValue) {
+        const x = this._xScale(seriesValue);
+        this._drawVerticalGridLine(x);
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x);
+        text.setAttribute('y', this._height - this._margin + 20);
+        text.textContent = Math.round(seriesValue * 100) / 100;
+        text.setAttribute('stroke', '#000');
+        text.setAttribute('text-anchor', 'middle');
+        this._xAxisGroup.appendChild(text);
+        this._drawVerticalGridLine(x);
+    }
+
+    _drawXAxis() {
         this._xAxisGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         line.setAttribute('d', `
@@ -115,6 +188,12 @@ export class SVGLineChartLogger extends Logger {
         label.setAttribute('text-anchor', 'middle');
         this._xAxisGroup.appendChild(label);
         this._element.appendChild(this._xAxisGroup);
+        const [start, end] = this._domain();
+        const tickSpacing = Math.ceil((end - start) / 5 * 10) / 10;
+        for (let seriesValue = start; seriesValue < end; seriesValue += tickSpacing) {
+            this._drawXAxisLabel(seriesValue);
+        }
+        this._drawXAxisLabel(end);
     }
 
     /**
@@ -123,20 +202,10 @@ export class SVGLineChartLogger extends Logger {
      * @param {number} index
      */
     _drawPoint(result, index) {
-        const seriesValue = (Math.round(result[this._seriesValue] * 100) / 100).toFixed(1);
         const value = result[this._value];
         const y = this._yScale(value);
-        const columnWidth = (this._width - this._margin * 2) / (this._data.length + 1);
-        const x = (index + 1) * columnWidth + this._margin;
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', x);
-        text.setAttribute('y', this._height - this._margin + 20);
-        text.textContent = seriesValue;
-        text.setAttribute('stroke', '#000');
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('width', columnWidth);
-        this._xAxisGroup.appendChild(text);
-
+        const seriesValue = result[this._seriesValue];
+        const x = this._xScale(seriesValue);
         const path = this._line.getAttribute('d');
         if (!path) {
             this._line.setAttribute('d', `M ${x}, ${y}`);
@@ -156,9 +225,9 @@ export class SVGLineChartLogger extends Logger {
         this._element = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         this._element.setAttribute('width', this._width);
         this._element.setAttribute('height', this._height);
-        this._setupYAxis();
-        this._setupXAxis();
-        this._setupLine();
+        this._drawYAxis();
+        this._drawXAxis();
+        this._drawLine();
         this._data.forEach(this._drawPoint.bind(this));
         if (oldElement) {
             oldElement.replaceWith(this._element);
