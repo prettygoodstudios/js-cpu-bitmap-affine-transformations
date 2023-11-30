@@ -7,9 +7,9 @@ import { transform } from "../src/transform.mjs";
  * @returns {number} Number of ms it took to compute
  */
 function timeIt(runnable) {
-    const start = Date.now();
+    const start = performance.now();
     runnable();
-    return Date.now() - start;
+    return performance.now() - start;
 }
 
 /**

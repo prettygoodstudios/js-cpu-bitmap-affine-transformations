@@ -5,6 +5,18 @@
         <link rel="stylesheet" href="./styles.css" />
     </head>
     <body>
+        <form class="EmpiricalStudyForm" id="empiricalStudyForm">
+            <label for="scaleFactorDelta">Scale Factor Delta:</label>
+            <input id="scaleFactorDelta" type="number" value="0.2" min="0" step="0.1"/>
+            <label for="scaleFactorMax">Scale Factor Max:</label>
+            <input id="scaleFactorMax" type="number" value="5" min="0"/>
+            <label for="runs">Runs:</label>
+            <input id="runs" type="number" value="20" step="1"/>
+            <button>Run!</button>
+        </form>
+        <button id="empiricalStudyStopButton">Stop!</button>
+        <div id="empiricalStudyLineChart"></div>
+        <div id="empiricalStudyTable"></div>
         <script src="./studies/empirical-study.mjs" type="module"></script>
     </body>
 </html>

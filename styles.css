@@ -54,3 +54,15 @@ td, th {
     z-index: -1;
     position: relative;
 }
+
+.EmpiricalStudyForm {
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+    gap: 16px;
+}
+
+#empiricalStudyStopButton {
+    margin-top: 16px;
+    display: none;
+}
