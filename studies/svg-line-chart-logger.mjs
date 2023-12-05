@@ -39,7 +39,13 @@ export class SVGLineChartLogger extends Logger {
             return [0, this._data[0][this._seriesValue] * 2];
         }
         const inputs = this._data.map(d => d[this._seriesValue]);
-        return [Math.floor(Math.min(...inputs) * 10) / 10, Math.ceil(Math.max(...inputs) * 10) / 10];
+        return [0, Math.ceil(Math.max(...inputs) * 10) / 10];
+    }
+
+    _computeMaxYAxisWidth() {
+        const largestMagnitude = Math.max(...this._range().map(Math.abs));
+        const digits = largestMagnitude.toString().length;
+        return digits * 10;
     }
 
     /**
@@ -84,7 +90,7 @@ export class SVGLineChartLogger extends Logger {
             const value = (end - start) / ticks * tick;
             const y = this._yScale(value);
             const tickLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            tickLabel.setAttribute('x', this._margin - 40);
+            tickLabel.setAttribute('x', this._margin - this._computeMaxYAxisWidth() - 5);
             tickLabel.setAttribute('y', y);
             tickLabel.textContent = value;
             tickLabel.setAttribute('stroke', '#000');
@@ -107,7 +113,7 @@ export class SVGLineChartLogger extends Logger {
         line.setAttribute('stroke', '#000');
         group.appendChild(line);
         const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        const labelPosition = this._margin - 55;
+        const labelPosition = this._margin - this._computeMaxYAxisWidth() - 20;
         label.setAttribute('x', labelPosition);
         label.setAttribute('y', this._height / 2);
         label.textContent = this._labels.value ?? this._value;
@@ -189,7 +195,31 @@ export class SVGLineChartLogger extends Logger {
         this._xAxisGroup.appendChild(label);
         this._element.appendChild(this._xAxisGroup);
         const [start, end] = this._domain();
-        const tickSpacing = Math.ceil((end - start) / 5 * 10) / 10;
+        const difference = end - start;
+        const tickSpacing = (() => {
+            if (difference <= 1) {
+                return 0.1;
+            }
+            if (difference <= 2) {
+                return 0.2;
+            }
+            if (difference <= 5) {
+                return 0.5;
+            }
+            if (difference <= 10) {
+                return 1;
+            }
+            if (difference <= 50) {
+                return 5;
+            }
+            if (difference <= 100) {
+                return 10;
+            }
+            if (difference <= 500) {
+                return 50;
+            }
+            return 100;
+        })();
         for (let seriesValue = start; seriesValue < end; seriesValue += tickSpacing) {
             this._drawXAxisLabel(seriesValue);
         }
@@ -225,6 +255,7 @@ export class SVGLineChartLogger extends Logger {
         this._element = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         this._element.setAttribute('width', this._width);
         this._element.setAttribute('height', this._height);
+        // this._margin = this._computeMargin();
         this._drawYAxis();
         this._drawXAxis();
         this._drawLine();

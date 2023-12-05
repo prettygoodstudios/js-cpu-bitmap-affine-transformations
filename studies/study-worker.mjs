@@ -57,9 +57,7 @@ function timeTransform(n, scaleFactor) {
         , 0);
 }
 
-
 self.onmessage = (event) => {
     const totalTimeInMs = timeTransform(event.data.runs, event.data.scaleFactor);
     self.postMessage(totalTimeInMs);
 };
-

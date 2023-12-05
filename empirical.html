@@ -6,6 +6,12 @@
     </head>
     <body>
         <form class="EmpiricalStudyForm" id="empiricalStudyForm">
+            <label for="threads">
+                Threads:
+                <br/>
+                <small>Determines how many worker threads will be spawned to run the study. Defaults to the number of logical threads on system. Cannot be set to a value above the number of logical threads on system.</small>
+            </label>
+            <input id="threads" type="number" value="4" min="1" step="1"/>
             <label for="scaleFactorDelta">Scale Factor Delta:</label>
             <input id="scaleFactorDelta" type="number" value="0.2" min="0" step="0.1"/>
             <label for="scaleFactorMax">Scale Factor Max:</label>
