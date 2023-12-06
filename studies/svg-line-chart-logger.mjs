@@ -44,8 +44,8 @@ export class SVGLineChartLogger extends Logger {
         this._margin = {
             top: 15,
             right: 0,
-            bottom: 70,
-            left: 70,
+            bottom: 27,
+            left: 0,
         };
         this._axisColor = '#000';
         this._seriesColor = '#00f';

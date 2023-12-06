@@ -55,14 +55,21 @@ td, th {
     position: relative;
 }
 
-.EmpiricalStudyForm {
+.EmpiricalStudy {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.EmpiricalStudy__form {
     display: flex;
     flex-direction: column;
     max-width: 500px;
     gap: 16px;
 }
 
-#empiricalStudyStopButton {
+.EmpiricalStudy__stopButton {
     margin-top: 16px;
     display: none;
+    max-width: 500px;
 }
