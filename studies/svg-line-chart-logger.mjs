@@ -1,14 +1,42 @@
 import { Logger } from "./logger.mjs";
 
+/**
+ * 
+ * @param {SVGElement} element 
+ * @param {Record<string, string>} attributes 
+ */
+const setSvgAttributes = (element, attributes) => {
+    const properties = ['textContent'];
+    for (const [attribute, value] of Object.entries(attributes)) {
+        if (properties.includes(attribute)) {
+            element[attribute] = value;
+            continue;
+        }
+        element.setAttribute(attribute, value);
+    }
+}
+
+/**
+ * 
+ * @param {string} tag 
+ * @param {Record<string, string>=} attributes
+ * @returns {SVGElement}
+ */
+const createSvgElement = (tag, attributes = {}) => {
+    /** @type {SVGElement} */
+    const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    setSvgAttributes(element, attributes);
+    return element;
+}
+
 export class SVGLineChartLogger extends Logger {
     /**
      * 
      * @param {string} seriesValue 
      * @param {string} value
-     * @param {[number, number]} range
      * @param {{seriesValue?: string, value?: string}=} labels
      */
-    constructor(seriesValue, value, range, labels) {
+    constructor(seriesValue, value, labels) {
         super();
         this._labels = labels ?? {};
         this._seriesValue = seriesValue;
@@ -80,59 +108,65 @@ export class SVGLineChartLogger extends Logger {
     }
 
     _drawLine() {
-        this._lineGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        this._line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        this._line.setAttribute('stroke', '#00f');
-        this._line.setAttribute('fill', 'none');
+        this._lineGroup = createSvgElement('g');
+        this._line = createSvgElement('path', {
+            stroke: '#00f',
+            fill: 'none',
+        });
         this._lineGroup.appendChild(this._line);
         this._element.appendChild(this._lineGroup);
     }
 
     _drawYAxis() {
-        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const group = createSvgElement('g');
         const ticks = 5;
         const [start, end] = this._range();
         for (let tick = 0; tick <= ticks; tick++) {
             const value = (end - start) / ticks * tick;
             const y = this._yScale(value);
-            const tickLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            tickLabel.setAttribute('x', this._margin.left - this._computeMaxYAxisWidth() - this._yAxisTickLabelOffset);
-            tickLabel.setAttribute('y', y);
-            tickLabel.textContent = value;
-            tickLabel.setAttribute('stroke', '#000');
-            tickLabel.setAttribute('alignment-baseline', 'middle');
+            const tickLabel = createSvgElement('text', {
+                x: this._margin.left - this._computeMaxYAxisWidth() - this._yAxisTickLabelOffset,
+                y,
+                textContent: value,
+                stroke: '#000',
+                'alignment-baseline': 'middle',
+            });
             group.appendChild(tickLabel);
-            const tickNode = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            tickNode.setAttribute('d', `
+            const tickNode = createSvgElement('path', {
+                d: `
                 M ${this._margin.left - 5}, ${y}
                 L ${this._margin.left}, ${y}
-            `);
-            tickNode.setAttribute('stroke', '#000');
+                `,
+                stroke: '#000',
+            });
             group.appendChild(tickNode);
             this._drawHorizontalGridLine(y);
         }
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        line.setAttribute('d', `
+        const line = createSvgElement('path', {
+            'd': `
             M ${this._margin.left}, ${this._margin.top}
-            L ${this._margin.left}, ${this._height - this._margin.bottom}
-        `);
-        line.setAttribute('stroke', '#000');
+            L ${this._margin.left}, ${this._height - this._margin.bottom}`,
+            stroke: '#000',
+        });
         group.appendChild(line);
-        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        const labelPosition = this._margin.left - this._computeMaxYAxisWidth() - this._yAxisTickLabelOffset - this._yAxisLabelOffset;
-        label.setAttribute('x', labelPosition);
-        label.setAttribute('y', this._height / 2);
-        label.textContent = this._labels.value ?? this._value;
-        label.setAttribute('stroke', '#000');
-        label.setAttribute('alignment-baseline', 'middle');
-        label.setAttribute('visibility', 'hidden');
+        const labelXPosition = this._margin.left - this._computeMaxYAxisWidth() - this._yAxisTickLabelOffset - this._yAxisLabelOffset;
+        const label = createSvgElement('text', {
+            x: labelXPosition,
+            y: this._height / 2,
+            textContent: this._labels.value ?? this._value,
+            stroke: '#000',
+            'alignment-baseline': 'middle',
+            visibility: 'hidden',
+        });
         group.appendChild(label);
         this._element.appendChild(group);
         setTimeout(() => {
-            label.setAttribute('transform-origin', `${labelPosition} ${this._height / 2}`);
             const textBBox = label.getBBox();
-            label.setAttribute('transform', `translate(0, ${textBBox.width / 2}) rotate(270)`);
-            label.setAttribute('visibility', 'visible');
+            setSvgAttributes(label, {
+                'transform-origin': `${labelXPosition} ${this._height / 2}`,
+                transform: `translate(0, ${textBBox.width / 2}) rotate(270)`,
+                visibility: 'visible',
+            });
         });
     }
 
@@ -141,13 +175,13 @@ export class SVGLineChartLogger extends Logger {
      * @param {number} y 
      */
     _drawHorizontalGridLine(y) {
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        line.setAttribute('d', `
+        const line = createSvgElement('path', {
+            d: `
             M ${this._margin.left}, ${y}
-            L ${this._width - this._margin.right}, ${y}
-        `);
-        line.setAttribute('stroke', '#bbb');
-        line.setAttribute('stroke-dasharray', '15, 10, 5, 10');
+            L ${this._width - this._margin.right}, ${y}`,
+            stroke: '#bbb',
+            'stroke-dasharray': '15, 10, 5, 10',
+        });
         this._element.appendChild(line);
     }
 
@@ -156,13 +190,13 @@ export class SVGLineChartLogger extends Logger {
      * @param {number} x
      */
     _drawVerticalGridLine(x) {
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        line.setAttribute('d', `
+        const line = createSvgElement('path', {
+            d: `
             M ${x}, ${this._margin.top}
-            L ${x}, ${this._height - this._margin.bottom}
-        `);
-        line.setAttribute('stroke', '#bbb');
-        line.setAttribute('stroke-dasharray', '15, 10, 5, 10');
+            L ${x}, ${this._height - this._margin.bottom}`,
+            stroke: '#bbb',
+            'stroke-dasharray': '15, 10, 5, 10',
+        })
         this._element.appendChild(line);
     }
 
@@ -173,59 +207,68 @@ export class SVGLineChartLogger extends Logger {
     _drawXAxisLabel(seriesValue) {
         const x = this._xScale(seriesValue);
         this._drawVerticalGridLine(x);
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', x);
-        text.setAttribute('y', this._height - this._margin.bottom + 20);
-        text.textContent = Math.round(seriesValue * 100) / 100;
-        text.setAttribute('stroke', '#000');
-        text.setAttribute('text-anchor', 'middle');
+        const text = createSvgElement('text', {
+            x,
+            y: this._height - this._margin.bottom + 20,
+            textContent: Math.round(seriesValue * 100) / 100,
+            stroke: '#000',
+            'text-anchor': 'middle',
+        });
         this._xAxisGroup.appendChild(text);
         this._drawVerticalGridLine(x);
     }
 
+    /**
+     * 
+     * @param {number} difference 
+     */
+    _tickSpacing(difference) {
+        if (difference <= 1) {
+            return 0.1;
+        }
+        if (difference <= 2) {
+            return 0.2;
+        }
+        if (difference <= 5) {
+            return 0.5;
+        }
+        if (difference <= 10) {
+            return 1;
+        }
+        if (difference <= 50) {
+            return 5;
+        }
+        if (difference <= 100) {
+            return 10;
+        }
+        if (difference <= 500) {
+            return 50;
+        }
+        return 100;
+    }
+
     _drawXAxis() {
-        this._xAxisGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        line.setAttribute('d', `
+        this._xAxisGroup = createSvgElement('g');
+        const line = createSvgElement('path', {
+            d: `
             M ${this._margin.left}, ${this._height - this._margin.bottom}
-            L ${this._width - this._margin.right}, ${this._height - this._margin.bottom}
-        `);
-        line.setAttribute('stroke', '#000');
+            L ${this._width - this._margin.right}, ${this._height - this._margin.bottom}`,
+            stroke: '#000',
+
+        });
         this._xAxisGroup.appendChild(line);
-        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        label.setAttribute('x', (this._width - this._margin.right + this._margin.left) / 2);
-        label.setAttribute('y', this._height - this._margin.bottom + 40);
-        label.textContent = this._labels.seriesValue ?? this._seriesValue;
-        label.setAttribute('stroke', '#000');
-        label.setAttribute('text-anchor', 'middle');
+        const label = createSvgElement('text', {
+            x: this._width + (this._width - this._margin.right + this._margin.left) / 2,
+            y: this._height - this._margin.bottom + 40,
+            textContent: this._labels.seriesValue ?? this._seriesValue,
+            stroke: '#000',
+            'text-anchor': 'middle',
+        });
         this._xAxisGroup.appendChild(label);
         this._element.appendChild(this._xAxisGroup);
         const [start, end] = this._domain();
         const difference = end - start;
-        const tickSpacing = (() => {
-            if (difference <= 1) {
-                return 0.1;
-            }
-            if (difference <= 2) {
-                return 0.2;
-            }
-            if (difference <= 5) {
-                return 0.5;
-            }
-            if (difference <= 10) {
-                return 1;
-            }
-            if (difference <= 50) {
-                return 5;
-            }
-            if (difference <= 100) {
-                return 10;
-            }
-            if (difference <= 500) {
-                return 50;
-            }
-            return 100;
-        })();
+        const tickSpacing = this._tickSpacing(difference);
         for (let seriesValue = start; seriesValue < end; seriesValue += tickSpacing) {
             this._drawXAxisLabel(seriesValue);
         }
@@ -235,9 +278,8 @@ export class SVGLineChartLogger extends Logger {
     /**
      * 
      * @param {Record<string, unknown>} result 
-     * @param {number} index
      */
-    _drawPoint(result, index) {
+    _drawPoint(result) {
         const value = result[this._value];
         const y = this._yScale(value);
         const seriesValue = result[this._seriesValue];
@@ -248,11 +290,12 @@ export class SVGLineChartLogger extends Logger {
         } else {
             this._line.setAttribute('d', path + `\nL ${x}, ${y}`);
         }
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', x);
-        circle.setAttribute('cy', y);
-        circle.setAttribute('r', 4);
-        circle.setAttribute('fill', '#00f');
+        const circle = createSvgElement('circle', {
+            cx: x,
+            cy: y,
+            r: 4,
+            fill: '#00f',
+        });
         this._element.appendChild(circle);
     }
 
@@ -263,9 +306,10 @@ export class SVGLineChartLogger extends Logger {
 
     _render() {
         const oldElement = this._element;
-        this._element = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        this._element.setAttribute('width', this._width);
-        this._element.setAttribute('height', this._height);
+        this._element = createSvgElement('svg', {
+            width: this._width,
+            height: this._height,
+        });
         this._computeLeftMargin();
         this._drawYAxis();
         this._drawXAxis();

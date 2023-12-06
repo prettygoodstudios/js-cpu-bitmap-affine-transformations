@@ -62,7 +62,7 @@ function setupEditor() {
 function runStudy(scaleFactorMax, scaleFactorDelta, runs, threads) {
     const csvLogger = new CSVLogger(['scaleFactor', 'totalTimeInMs', 'averageTimeInMs']);
     const htmlTableLogger = new HTML5TableLogger(['scaleFactor', 'totalTimeInMs', 'averageTimeInMs'], { scaleFactor: 'Scale Factor', totalTimeInMs: 'Total Time (ms)', averageTimeInMs: 'Average Time (ms)'});
-    const lineChartLogger = new SVGLineChartLogger('scaleFactor', 'averageTimeInMs', [0, 1000], { value: 'Average Time (ms)', seriesValue: 'Scale Factor' });
+    const lineChartLogger = new SVGLineChartLogger('scaleFactor', 'averageTimeInMs', { value: 'Average Time (ms)', seriesValue: 'Scale Factor' });
     const lineChartContainer = document.querySelector('#empiricalStudyLineChart');
     const tableContainer = document.querySelector('#empiricalStudyTable');
     lineChartContainer.replaceChildren(lineChartLogger.element);
