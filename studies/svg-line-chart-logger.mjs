@@ -44,7 +44,7 @@ export class SVGLineChartLogger extends Logger {
         this._margin = {
             top: 15,
             right: 0,
-            bottom: 27,
+            bottom: 50,
             left: 0,
         };
         this._axisColor = '#000';
@@ -282,7 +282,7 @@ export class SVGLineChartLogger extends Logger {
         });
         this._xAxisGroup.appendChild(line);
         const label = createSvgElement('text', {
-            x: this._width + (this._width - this._margin.right + this._margin.left) / 2,
+            x: (this._width - this._margin.right + this._margin.left) / 2,
             y: this._height - this._margin.bottom + 40,
             textContent: this._labels.seriesValue ?? this._seriesValue,
             stroke: this._axisColor,
