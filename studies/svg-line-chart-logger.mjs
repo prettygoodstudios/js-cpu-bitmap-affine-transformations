@@ -47,6 +47,9 @@ export class SVGLineChartLogger extends Logger {
             bottom: 70,
             left: 70,
         };
+        this._axisColor = '#000';
+        this._seriesColor = '#00f';
+        this._gridColor = '#bbb';
         this._yAxisTickLabelOffset = 5;
         this._yAxisLabelOffset = 15;
         this._width = 1000;
@@ -62,7 +65,8 @@ export class SVGLineChartLogger extends Logger {
             return [0, 100];
         }
         const values = this._data.map(d => d[this._value]);
-        return [0, Math.ceil(Math.max(...values) / 10) * 10];
+        const tickSpacing = this._tickSpacing(Math.max(...values));
+        return [0, Math.ceil(Math.max(...values) / tickSpacing) * tickSpacing];
     }
 
     _domain() {
@@ -110,43 +114,51 @@ export class SVGLineChartLogger extends Logger {
     _drawLine() {
         this._lineGroup = createSvgElement('g');
         this._line = createSvgElement('path', {
-            stroke: '#00f',
+            stroke: this._seriesColor,
             fill: 'none',
         });
         this._lineGroup.appendChild(this._line);
         this._element.appendChild(this._lineGroup);
     }
 
+    /**
+     * @param {SVGElement} group
+     * @param {number} value 
+     */
+    _drawYAxisTick(group, value) {
+        const y = this._yScale(value);
+        const tickLabel = createSvgElement('text', {
+            x: this._margin.left - this._computeMaxYAxisWidth() - this._yAxisTickLabelOffset,
+            y,
+            textContent: value,
+            stroke: this._axisColor,
+            'alignment-baseline': 'middle',
+        });
+        group.appendChild(tickLabel);
+        const tickNode = createSvgElement('path', {
+            d: `
+            M ${this._margin.left - 5}, ${y}
+            L ${this._margin.left}, ${y}
+            `,
+            stroke: this._axisColor,
+        });
+        group.appendChild(tickNode);
+        this._drawHorizontalGridLine(y);
+    }
+
     _drawYAxis() {
         const group = createSvgElement('g');
-        const ticks = 5;
-        const [start, end] = this._range();
-        for (let tick = 0; tick <= ticks; tick++) {
-            const value = (end - start) / ticks * tick;
-            const y = this._yScale(value);
-            const tickLabel = createSvgElement('text', {
-                x: this._margin.left - this._computeMaxYAxisWidth() - this._yAxisTickLabelOffset,
-                y,
-                textContent: value,
-                stroke: '#000',
-                'alignment-baseline': 'middle',
-            });
-            group.appendChild(tickLabel);
-            const tickNode = createSvgElement('path', {
-                d: `
-                M ${this._margin.left - 5}, ${y}
-                L ${this._margin.left}, ${y}
-                `,
-                stroke: '#000',
-            });
-            group.appendChild(tickNode);
-            this._drawHorizontalGridLine(y);
+        const [,end] = this._range();
+        const tickSpacing = this._tickSpacing(end);
+        for (let value = 0; value < end; value += tickSpacing) {
+            this._drawYAxisTick(group, value);
         }
+        this._drawYAxisTick(group, end);
         const line = createSvgElement('path', {
             'd': `
             M ${this._margin.left}, ${this._margin.top}
             L ${this._margin.left}, ${this._height - this._margin.bottom}`,
-            stroke: '#000',
+            stroke: this._axisColor,
         });
         group.appendChild(line);
         const labelXPosition = this._margin.left - this._computeMaxYAxisWidth() - this._yAxisTickLabelOffset - this._yAxisLabelOffset;
@@ -154,7 +166,7 @@ export class SVGLineChartLogger extends Logger {
             x: labelXPosition,
             y: this._height / 2,
             textContent: this._labels.value ?? this._value,
-            stroke: '#000',
+            stroke: this._axisColor,
             'alignment-baseline': 'middle',
             visibility: 'hidden',
         });
@@ -179,7 +191,7 @@ export class SVGLineChartLogger extends Logger {
             d: `
             M ${this._margin.left}, ${y}
             L ${this._width - this._margin.right}, ${y}`,
-            stroke: '#bbb',
+            stroke: this._gridColor,
             'stroke-dasharray': '15, 10, 5, 10',
         });
         this._element.appendChild(line);
@@ -194,7 +206,7 @@ export class SVGLineChartLogger extends Logger {
             d: `
             M ${x}, ${this._margin.top}
             L ${x}, ${this._height - this._margin.bottom}`,
-            stroke: '#bbb',
+            stroke: this._gridColor,
             'stroke-dasharray': '15, 10, 5, 10',
         })
         this._element.appendChild(line);
@@ -211,7 +223,7 @@ export class SVGLineChartLogger extends Logger {
             x,
             y: this._height - this._margin.bottom + 20,
             textContent: Math.round(seriesValue * 100) / 100,
-            stroke: '#000',
+            stroke: this._axisColor,
             'text-anchor': 'middle',
         });
         this._xAxisGroup.appendChild(text);
@@ -244,7 +256,19 @@ export class SVGLineChartLogger extends Logger {
         if (difference <= 500) {
             return 50;
         }
-        return 100;
+        if (difference <= 1000) {
+            return 100;
+        }
+        if (difference <= 2000) {
+            return 500;
+        }
+        if (difference <= 10000) {
+            return 1000;
+        }
+        if (difference <= 40000) {
+            return 5000;
+        }
+        return 10000;
     }
 
     _drawXAxis() {
@@ -253,7 +277,7 @@ export class SVGLineChartLogger extends Logger {
             d: `
             M ${this._margin.left}, ${this._height - this._margin.bottom}
             L ${this._width - this._margin.right}, ${this._height - this._margin.bottom}`,
-            stroke: '#000',
+            stroke: this._axisColor,
 
         });
         this._xAxisGroup.appendChild(line);
@@ -261,7 +285,7 @@ export class SVGLineChartLogger extends Logger {
             x: this._width + (this._width - this._margin.right + this._margin.left) / 2,
             y: this._height - this._margin.bottom + 40,
             textContent: this._labels.seriesValue ?? this._seriesValue,
-            stroke: '#000',
+            stroke: this._axisColor,
             'text-anchor': 'middle',
         });
         this._xAxisGroup.appendChild(label);
@@ -294,7 +318,7 @@ export class SVGLineChartLogger extends Logger {
             cx: x,
             cy: y,
             r: 4,
-            fill: '#00f',
+            fill: this._seriesColor,
         });
         this._element.appendChild(circle);
     }
