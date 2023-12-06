@@ -5,24 +5,26 @@
         <link rel="stylesheet" href="./styles.css" />
     </head>
     <body>
-        <form class="EmpiricalStudyForm" id="empiricalStudyForm">
-            <label for="threads">
-                Threads:
-                <br/>
-                <small>Determines how many worker threads will be spawned to run the study. Defaults to the number of logical threads on system. Cannot be set to a value above the number of logical threads on system.</small>
-            </label>
-            <input id="threads" type="number" value="4" min="1" step="1"/>
-            <label for="scaleFactorDelta">Scale Factor Delta:</label>
-            <input id="scaleFactorDelta" type="number" value="0.2" min="0" step="0.1"/>
-            <label for="scaleFactorMax">Scale Factor Max:</label>
-            <input id="scaleFactorMax" type="number" value="5" min="0"/>
-            <label for="runs">Runs:</label>
-            <input id="runs" type="number" value="20" step="1"/>
-            <button>Run!</button>
-        </form>
-        <button id="empiricalStudyStopButton">Stop!</button>
-        <div id="empiricalStudyLineChart"></div>
-        <div id="empiricalStudyTable"></div>
+        <div class="EmpiricalStudy">
+            <form class="EmpiricalStudy__form" id="empiricalStudyForm">
+                <label for="threads">
+                    Threads:
+                    <br/>
+                    <small>Determines how many worker threads will be spawned to run the study. Defaults to the number of logical threads on system. Cannot be set to a value above the number of logical threads on system.</small>
+                </label>
+                <input id="threads" type="number" value="4" min="1" step="1"/>
+                <label for="scaleFactorDelta">Scale Factor Delta:</label>
+                <input id="scaleFactorDelta" type="number" value="0.2" min="0" step="0.1"/>
+                <label for="scaleFactorMax">Scale Factor Max:</label>
+                <input id="scaleFactorMax" type="number" value="5" min="0"/>
+                <label for="runs">Runs:</label>
+                <input id="runs" type="number" value="20" step="1"/>
+                <button>Run!</button>
+            </form>
+            <button class="EmpiricalStudy__stopButton" id="empiricalStudyStopButton">Stop!</button>
+            <div id="empiricalStudyLineChart"></div>
+            <div id="empiricalStudyTable"></div>
+        </div>
         <script src="./studies/empirical-study.mjs" type="module"></script>
     </body>
 </html>
