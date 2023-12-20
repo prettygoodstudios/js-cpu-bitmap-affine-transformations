@@ -265,6 +265,9 @@ export class SVGLineChartLogger extends Logger {
         if (difference <= 10000) {
             return 1000;
         }
+        if (difference <= 15000) {
+            return 2500;
+        }
         if (difference <= 40000) {
             return 5000;
         }

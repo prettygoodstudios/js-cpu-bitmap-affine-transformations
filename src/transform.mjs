@@ -51,7 +51,7 @@ export function parseTransformCommands(commands) {
     const matches = commands.matchAll(/(\w+)\(([^\)]*)\)/g);
     const commandList = [];
     for (let match of matches) {
-        const inputMatches =  match[2].matchAll(/(\-?\d+.?\d*)(\s*,|\s*$)/g);
+        const inputMatches =  match[2].matchAll(/(\-?\d+\.?\d*)(\s*,|\s*$)/g);
         const inputs = [];
         for (let inputMatch of inputMatches) {
             inputs.push(parseFloat(inputMatch[1]));

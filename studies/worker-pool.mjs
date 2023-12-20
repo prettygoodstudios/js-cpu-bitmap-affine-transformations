@@ -25,7 +25,7 @@ export class WorkerPool {
                 this.__spawnWorker();
             });
             this.__spawnWorker();
-        }
+        } 
     }
 
     terminate() {
