@@ -9,7 +9,13 @@ import { transform } from "./transform.mjs";
  */
 export function animateImageData(imageData, angle, lastFrame) {
     const { newImageData, left, top } = transform(imageData, `translate(${angle*0.5}, ${angle*0.5}) scale(1.2) rotate(${angle})`);
+    /**
+     * @type {HTMLImageElement}
+     */
     const animation = document.querySelector('#animation');
+    /**
+     * @type {HTMLDivElement}
+     */
     const animationWrapper = document.querySelector('#animationWrapper');
     animationWrapper.style.width = `${imageData.width}px`;
     animationWrapper.style.height = `${imageData.height}px`;

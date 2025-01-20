@@ -6,6 +6,6 @@ module.exports = async () => {
         "mjs",
         "js",
       ],
-      testRegex: `.*\.mjs$`,
+      testRegex: `tests.*\.mjs$`,
     };
   };
