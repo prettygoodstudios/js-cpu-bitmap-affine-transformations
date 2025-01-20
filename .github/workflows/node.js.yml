@@ -21,7 +21,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: ./tests.sh
+    - run: ./scripts/tests.sh
   types:
     runs-on: ubuntu-latest
     strategy:
@@ -33,4 +33,4 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm i -g typescript && ./types.sh
+    - run: ./scripts/types.sh

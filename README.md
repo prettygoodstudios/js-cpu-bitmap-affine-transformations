@@ -7,7 +7,7 @@ The purpose of this repository is to be an educational resource on the math behi
 
 ## Getting it up and running
 
-This project is built using native ES modules, therefore, you'll need to serve up the files in this project with a web server (See the [troubleshooting section of the MDN ES module guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#troubleshooting) for a more detailed explanation). Running `./run.sh` (will not work on Windows) from the root directory of this repository will start up a web server serving up the right files at [http://localhost:8000](http://localhost:8000), if your system has Python2 or Python3 installed. You can also use another web server of your choice.
+This project is built using native ES modules, therefore, you'll need to serve up the files in this project with a web server (See the [troubleshooting section of the MDN ES module guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#troubleshooting) for a more detailed explanation). Running `./scripts/run.sh` (will not work on Windows) from the root directory of this repository will start up a web server serving up the right files at [http://localhost:8000](http://localhost:8000), if your system has Python2 or Python3 installed. You can also use another web server of your choice.
 
 ## Prerequisite Knowledge
 
@@ -65,7 +65,7 @@ If you would like to contribute to this project, there is a suite of tests writt
 
 ### Running the tests
 
-* These tests can be ran by running `./tests.sh` (will not work on Windows) from the [tests](./tests) directory. 
+* These tests can be ran by running `./scripts/tests.sh` (will not work on Windows) from the root directory. 
 * This project is also configured to work with [VSCode's](https://code.visualstudio.com) [Jest extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest) and the test suite can be ran and debugged via it.
 
 ## CI and contributing
