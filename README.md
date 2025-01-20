@@ -1,7 +1,7 @@
 # CPU Bitmap Affine Transformations
 
 
-+ [![cov](https://<you>.github.io/js-cpu-bitmap-affine-transformations/badges/coverage.svg)](https://github.com/prettygoodstudios/js-cpu-bitmap-affine-transformations/actions)
++ [![cov](https://prettygoodstudios.github.io/js-cpu-bitmap-affine-transformations/badges/coverage.svg)](https://github.com/prettygoodstudios/js-cpu-bitmap-affine-transformations/actions)
 
 ## Introduction
 
