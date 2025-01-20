@@ -1,6 +1,8 @@
 # CPU Bitmap Affine Transformations
 
 
++ [![cov](https://prettygoodstudios.github.io/js-cpu-bitmap-affine-transformations/badges/coverage.svg)](https://github.com/prettygoodstudios/js-cpu-bitmap-affine-transformations/actions)
+
 ## Introduction
 
 The purpose of this repository is to be an educational resource on the math behind the CSS [transform](https://developer.mozilla.org/en-US/docs/Web/CSS/transform) property. It's self-contained, therefore, no third party libraries or build system is used. Even though CSS [transform](https://developer.mozilla.org/en-US/docs/Web/CSS/transform) is hardware accelerated via the GPU I decided to stay away from `WebGL` to keep the focus on the math.
