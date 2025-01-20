@@ -7,8 +7,8 @@ export class Matrix {
      * @param {number} cols
      * @param {Float32Array} data
      * @param {number} dataRowSize
-     * @param {rowOffset} rowOffset
-     * @param {colOffset} colOffset
+     * @param {number} rowOffset
+     * @param {number} colOffset
      */
     constructor(rows, cols, data = undefined, dataRowSize = undefined, rowOffset = 0, colOffset = 0) {
         this._rows = rows;
@@ -61,7 +61,8 @@ export class Matrix {
      * 
      * @param {number} col 
      * @param {number} row 
-     * @returns {number}
+     * @param {number} value
+     * 
      */
     set(col, row, value) {
         this._checkBounds(col, row);
@@ -84,13 +85,13 @@ export class Matrix {
             }
             return output;
         }
-        if (!other instanceof Matrix) {
+        if (!(other instanceof Matrix)) {
             throw Error('Can only multiply by matrix.');
         }
         if (other.rows !== this.cols) {
             throw Error(`The left matrices number of columns must equal the right's number of rows`);
         }
-        if (outputMatrix && (outputMatrix.row !== this.rows || outputMatrix.cols !== other.cols)) {
+        if (outputMatrix && (outputMatrix.rows !== this.rows || outputMatrix.cols !== other.cols)) {
             throw Error('A output matrix with invalid dimensions was provided.');
         }
         const output = outputMatrix ?? new Matrix(this.rows, other.cols);
@@ -123,7 +124,7 @@ export class Matrix {
             }
             return output;
         }
-        if (!other instanceof Matrix) {
+        if (!(other instanceof Matrix)) {
             throw Error('Can only add a number or matrix.');
         }
         if (other.rows !== this.rows || other.cols !== this.cols) {

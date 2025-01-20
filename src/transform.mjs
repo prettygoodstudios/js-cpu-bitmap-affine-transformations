@@ -58,10 +58,44 @@ export function parseTransformCommands(commands) {
         }
         commandList.push({
             name: match[1],
-            inputs,
+            inputs: /** @type {[number, number]} */ (inputs),
         });
     }
     return commandList;
+}
+
+const commandMap = {
+    'scale': scale,
+    /**
+     * @param {number} x 
+     */
+    'scaleX': (x) => scale(x, 1),
+    /**
+     * @param {number} y 
+     */
+    'scaleY': (y) => scale(1, y),
+    'rotate': rotate,
+    'translate': translate,
+    /**
+     * @param {number} x 
+     */
+    'translateX': (x) => translate(x, 0),
+    /**
+     * @param {number} y 
+     */
+    'translateY': (y) => translate(0, y),
+}
+
+/**
+ * @typedef {keyof typeof commandMap} CommandName
+ */
+
+/**
+ * @param {string} name
+ * @returns {name is CommandName} 
+ */
+function isValidCommand(name) {
+    return name in commandMap;
 }
 
 /**
@@ -70,24 +104,15 @@ export function parseTransformCommands(commands) {
  * @return {Matrix}
  */
 export function computeTransformMatrix(commands) {
-    const commandMap = {
-        'scale': scale,
-        'scaleX': (x) => scale(x, 1),
-        'scaleY': (y) => scale(1, y),
-        'rotate': rotate,
-        'translate': translate,
-        'translateX': (x) => translate(x, 0),
-        'translateY': (y) => translate(0, y),
-    }
     let transformMatrix = scale(1, 1);
     for (const {inputs, name} of parseTransformCommands(commands)) {
-        if (!commandMap[name]) {
+        if (!isValidCommand(name)) {
             throw Error(`Unsupported command provided to transform: ${name}`);
         }
         /**
          * @type {Matrix}
          */
-        const rightMatrix = commandMap[name](...inputs);
+        const rightMatrix = commandMap[name](...(inputs));
         transformMatrix = transformMatrix.multiply(rightMatrix);
     }
     return transformMatrix;
@@ -119,11 +144,11 @@ export function computeBoundingBox(extrema) {
 /**
  * @param {ImageData} imageData
  * @param {string} commands 
- * @param {[number, number]|undefined} origin 
+ * @param {[number, number]=} origin 
  */
 export function transform(imageData, commands, origin) {
     if (!origin) {
-        origin = [imageData.width/2, imageData.height/2];
+        origin = [(imageData.width/2)|0, (imageData.height/2)|0];
     }
     const transformMatrix = computeTransformMatrix(commands);
     const [originX, originY] = origin;
@@ -134,18 +159,18 @@ export function transform(imageData, commands, origin) {
             1,
         ])),
         new Matrix(3, 1, new Float32Array([
-            imageData.width - originX,
+            imageData.width - 1 - originX,
             0 - originY,
             1,
         ])),
         new Matrix(3, 1, new Float32Array([
             0 - originX,
-            imageData.height - originY,
+            imageData.height - 1 - originY,
             1,
         ])),
         new Matrix(3, 1, new Float32Array([
-            imageData.width - originX,
-            imageData.height - originY,
+            imageData.width - 1 - originX,
+            imageData.height - 1 - originY,
             1,
         ])),
     ].map(m => transformMatrix.multiply(m)).map(m => {
@@ -156,7 +181,7 @@ export function transform(imageData, commands, origin) {
 
     const {top, right, bottom, left} = computeBoundingBox(extrema);
     // The ImageData constructor doesn't permit images with a dimension of 0
-    const newImageData = new ImageData((right - left) || 1, (bottom - top) || 1);
+    const newImageData = new ImageData((right - left + 1) || 1, (bottom - top + 1) || 1);
     if (Math.abs(transformMatrix.det()) < Number.EPSILON) {
         // The transform matrix is singular. This can only occur if it's scaled to 0.
         return {
@@ -167,15 +192,24 @@ export function transform(imageData, commands, origin) {
     }
 
     const inverseTransformMatrix = transformMatrix.inverse();
-    console.time('Loop');
-    for (let row = top; row < bottom; row++) {
-        for (let col = left; col < right; col++) {
-            const positionVector = new Matrix(3, 1, new Float32Array([
-                col - originX,
-                row - originY,
-                1,
-            ]));
-            const originalPosition = inverseTransformMatrix.multiply(positionVector);
+    const positionVector = new Matrix(3, 1, new Float32Array([
+        0,
+        0,
+        1,
+    ]));
+    const originalPosition = new Matrix(3, 1, new Float32Array([
+        0,
+        0,
+        1,
+    ]));
+
+    for (let row = top; row <= bottom; row++) {
+        for (let col = left; col <= right; col++) {
+            positionVector.set(0, 0, col - originX);
+            positionVector.set(0, 1, row - originY);
+
+            inverseTransformMatrix.multiply(positionVector, originalPosition);
+
             const originalX = Math.round(originalPosition.get(0, 0) + originX);
             const originalY = Math.round(originalPosition.get(0, 1) + originY);
             const outsideImageBounds = originalX < 0 || originalY < 0 || originalX >= imageData.width || originalY >= imageData.height;
@@ -184,7 +218,6 @@ export function transform(imageData, commands, origin) {
             }
         }
     }
-    console.timeEnd('Loop');
 
     return {
         newImageData,

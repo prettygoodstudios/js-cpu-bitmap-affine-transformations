@@ -1,8 +1,8 @@
 
 /**
  * 
- * @param {CanvasImageSource} image
- * @returns {Promise<ImageData>}
+ * @param {ImageBitmap} bitmap
+ * @returns {ImageData}
  */
 export function getBitmapFromImageSource(bitmap) {
     const canvas = document.createElement('canvas');
@@ -20,8 +20,11 @@ export function getBitmapFromImageSource(bitmap) {
  * @returns {Promise<ImageData>}
  */
 export async function getBitmap(selector) {
-    const bitmap = await createImageBitmap(document.querySelector(selector));
-    return getBitmapFromImageSource(bitmap);
+    const element = document.querySelector(selector);
+    if (element instanceof HTMLImageElement) {
+        const bitmap = await createImageBitmap(element);
+        return getBitmapFromImageSource(bitmap);
+    }
 }
 
 /**

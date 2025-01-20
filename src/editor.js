@@ -27,17 +27,20 @@ export function setupEditor() {
         const image = document.createElement('img');
         image.style.position = 'absolute';
         reader.addEventListener('load', async (event) => {
-            image.src = event.target.result;
+            image.src = event.target.result?.toString();
         });
-        const imageListener = () => {
+        const imageListener = async () => {
             transformWrapper.replaceChildren(image);
-            transformWrapper.width = image.clientWidth;
-            transformWrapper.height = image.clientHeight;
-            selectedImageData = getBitmapFromImageSource(image);
+            transformWrapper.setAttribute('width', `${image.clientWidth}px`);
+            transformWrapper.setAttribute('height', `${image.clientHeight}px`);
+            const bitmap = await createImageBitmap(image)
+            selectedImageData = getBitmapFromImageSource(bitmap);
             image.removeEventListener('load', imageListener);
         };
         image.addEventListener('load', imageListener);
-        reader.readAsDataURL(e.target.files[0]);
+        if (e.target instanceof HTMLInputElement) {
+            reader.readAsDataURL(e.target.files[0]);
+        }
     });
     imageForm.onsubmit = (e) => {
         e.preventDefault();
@@ -54,7 +57,7 @@ export function setupEditor() {
                 const tableRow = document.createElement('tr');
                 for (let col = 0; col < transformMatrix.cols; col++) {
                     const tableCell = document.createElement('td');
-                    tableCell.innerText = transformMatrix.get(col, row);
+                    tableCell.textContent = transformMatrix.get(col, row)?.toLocaleString();
                     tableRow.appendChild(tableCell);
                 }
                 tableRows.push(tableRow);
