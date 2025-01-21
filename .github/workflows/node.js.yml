@@ -33,6 +33,7 @@ jobs:
         git add coverage
         git stash
         git checkout gh-pages
+        git rm -rf coverage
         git stash pop
         git add coverage
         git commit -m "Updating coverage badges"
