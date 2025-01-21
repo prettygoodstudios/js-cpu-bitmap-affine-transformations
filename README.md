@@ -1,7 +1,14 @@
 # CPU Bitmap Affine Transformations
 
+Test Coverage:
 
-+ [![cov](https://prettygoodstudios.github.io/js-cpu-bitmap-affine-transformations/badges/coverage.svg)](https://github.com/prettygoodstudios/js-cpu-bitmap-affine-transformations/actions)
+![Lines](https://prettygoodstudios.github.io/js-cpu-bitmap-affine-transformations/coverage/lines.svg)
+
+![Branches](https://prettygoodstudios.github.io/js-cpu-bitmap-affine-transformations/coverage/branches.svg)
+
+![Statements](https://prettygoodstudios.github.io/js-cpu-bitmap-affine-transformations/coverage/statements.svg)
+
+![Functions](https://prettygoodstudios.github.io/js-cpu-bitmap-affine-transformations/coverage/functions.svg)
 
 ## Introduction
 
