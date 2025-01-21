@@ -1,0 +1,18 @@
+<svg viewBox="150 20">
+    <defs>
+        <linearGradient id="greenGradient" x1="0" x2="0" y1="0" y2="1" gradientTransform="rotate(270)">
+            <stop offset="0%" stop-color="#a3ee5b" />
+            <stop offset="50%" stop-color="#66d855" />
+            <stop offset="100%" stop-color="#40ba0f" />
+        </linearGradient>
+        <linearGradient id="redGradient" x1="0" x2="0" y1="0" y2="1" gradientTransform="rotate(270)">
+            <stop offset="0%" stop-color="#F1959B" />
+            <stop offset="50%" stop-color="#F07470" />
+            <stop offset="100%" stop-color="#EA4C46" />
+        </linearGradient>
+    </defs>
+    <!-- <rect width="99" height="19" x="1" y="1" fill="url(#greenGradient)" rx="4" ry="4" stroke-width="1" stroke="#188300" /> -->
+    <!-- <rect width="99" height="19" x="1" y="1" fill="url(#redGradient)" rx="4" ry="4" stroke-width="1" stroke="#DC1C13" /> -->
+    <rect width="149" height="19" x="1" y="1" fill="url(#greenGradient)" rx="4" ry="4" stroke-width="1" stroke="#188300" />
+    <text x="75" y="11" font-size="12" font-family="Helvetica, Arial" text-anchor="middle" alignment-baseline="middle" fill="#000">Lines: 85.94%</text>
+</svg>
