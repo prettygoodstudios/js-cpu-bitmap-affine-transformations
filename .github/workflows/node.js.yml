@@ -15,6 +15,8 @@ jobs:
     strategy:
       matrix:
         node-version: [20.x]
+    env:
+      CI_COMMIT_AUTHOR: ${{ github.event.repository.name }} Continuous Integration
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
