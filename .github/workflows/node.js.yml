@@ -33,7 +33,7 @@ jobs:
         git checkout gh-pages
         git add coverage
         git commit -m "Updating coverage badges"
-        git rebase --strategy-option=theirs origin/main
+        git rebase --strategy-option=theirs origin/gh-pages
         git push --verbose origin gh-pages
   types:
     runs-on: ubuntu-latest
