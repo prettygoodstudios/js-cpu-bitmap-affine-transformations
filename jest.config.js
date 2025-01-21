@@ -15,5 +15,6 @@ module.exports = async () => {
           statements: 80,
         },
       },
+      coverageReporters: ["json-summary", "lcov"],
     };
   };
