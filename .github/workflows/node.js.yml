@@ -33,7 +33,6 @@ jobs:
         git add coverage
         git stash
         git checkout gh-pages
-        node scripts/generate-badge.js
         git stash pop
         git add coverage
         git commit -m "Updating coverage badges"
