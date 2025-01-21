@@ -22,9 +22,20 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: ./scripts/coverage.sh
-    - name: Update Coverage Badge
-      if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-      uses: we-cli/coverage-badge-action@main
+    - name: Generate Coverage Badge
+    - run: node scripts/generate-badge.js
+    - name: Configure Git
+    - run: |
+        git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+        git config --global user.email "username@users.noreply.github.com"
+    - name: Commit Coverage Badge
+    - run: |
+        git fetch origin
+        git checkout gh-pages
+        git add coverage
+        git commit -m "Updating coverage badges"
+        git rebase --strategy-option=theirs origin/main
+        git push --verbose
   types:
     runs-on: ubuntu-latest
     strategy:
